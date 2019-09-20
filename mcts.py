@@ -35,6 +35,7 @@ class Node:
         self.parent = parent
         self.action = action
         self.P = prob
+        self.val_pred = 0
         self.children = set()       #set of child nodes
 
 
@@ -213,6 +214,21 @@ def plan_mcts(root, policy_net, replay_buffer, n_iters=1000, t_max=10):
             node.expand(action_prob)
         
     return reward
+
+class dotdict(dict):
+    def __getattr__(self, name):
+        return self[name]
+
+class MCTS:
+    def __init__(self, root, model, args):
+        self.root = root
+        self.model = model
+        self.args = args
+        self.Examples = []
+
+    #def sampling(self):
+    #   for i in self.args.numMCTSSims:
+
 
 if __name__ == "__main__":
     policy_net = Policy()

@@ -105,17 +105,23 @@ class Model(nn.Module):
         self.fc1 = nn.Linear(41, 82)
         self.fc2 = nn.Linear(82, 40)
         self.action_prob_out = nn.Linear(40, 8)
-        self.val0 = nn.Linear(40, 80)
-        self.val_sum_out = nn.Linear(80, 6)
+        #self.val0 = nn.Linear(40, 80)
+        self.val = nn.Linear(40, 1)
 
     def forward(self, x):
+
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         act_prob = F.softmax(self.action_prob_out(x), dim=0)
-        val = F.relu(self.val0(x))
-        val_sum = self.val_sum_out(val)
+        val = F.relu(self.val(x))
+        #val_sum = self.val_sum_out(val)
 
-        return act_prob, val_sum
+        return act_prob, val
+
+    def predict(self, x):
+        x = Variable(Tensor(x))
+        act_prob, val = self.forward(x)
+        return act_prob.data.numpy(), val.data.numpy()
 
    #def regularize(self):
    #    for w in model.parameters():
