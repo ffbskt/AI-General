@@ -113,7 +113,7 @@ class Model(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         act_prob = F.softmax(self.action_prob_out(x), dim=0)
-        val = F.relu(self.val(x))
+        val = F.tanh(self.val(x))
         #val_sum = self.val_sum_out(val)
 
         return act_prob, val

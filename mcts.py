@@ -18,7 +18,11 @@ class Node:
         self.Q = 0
 
     def __lt__(self, other):
-        return self.predR < other.predR
+        if self.fin_reward:
+            return False
+        if other.fin_reward:
+            return True
+        return self.predR > other.predR
 
 class MCTS_best_leaf:
     """
@@ -33,41 +37,62 @@ class MCTS_best_leaf:
         self.args = args
         node = Node('', 1, 0.5)
         self.heap_best = [node,]
-        self.Ns = defaultdict(int)
+        self.Nodes = {'': node}
         #self.Ns[node.formula]
         self.model = model
+        #self.samples = []
 
     def find_best_leaf(self):
         return heapq.heappop(self.heap_best)
 
     def expand(self, node):
+        #print(node.fin_reward)
         pred_P, pred_R = self.model.predict(self.env.get_observation(node.formula))
-        self.up_prev_N(node.formula)
+        self.up_prev_N(node)
         for a in range(self.env.n_actions):
             r, next_formula = self.env.do_move(node.formula, a)
             Q = self.compute_Q(pred_P[a], pred_R[a], next_formula)
-            node = Node(next_formula, pred_P[a], pred_R[a])
-            print(Q, node)
-            heapq.heappush(self.heap_best, node) ###&&&
+            new_node = Node(next_formula, pred_P[a], pred_R[a], fin_reward=r)
+            #print(next_formula, r)
+            heapq.heappush(self.heap_best, new_node) ###&&&
+            if r != 0:
+                self.Nodes[next_formula] = new_node
 
-    def up_prev_N(self, formula):
+        return r
+
+    def up_prev_N(self, node):
+        #print(self.Ns)
+        formula = node.formula
+        if formula in self.Nodes:
+            return 0
+        self.Nodes[formula] = node
+        self.Nodes[formula].N += 1
         for i in range(len(formula)):
-            self.Ns[formula[:-i]] += 1
+            #print(formula, formula[:-i - 1], i)
+            self.Nodes[formula[:-i]].N += 1
 
     def compute_Q(self, pred_P, pred_R, formula):
-        return pred_R + self.args.cpuct * pred_P * np.sqrt(self.Ns[formula[:-1]])
+        # print(formula, pred_R,  self.args.cpuct * pred_P * np.sqrt(self.Ns[formula[:-1]]), self.Ns[formula[:-1]], self.Ns, formula[:-1])
+        return pred_R + self.args.cpuct * pred_P * np.sqrt(self.Nodes[formula[:-1]].N)
 
 
-#if __name__ == "__main__":
-model = Model()
-env = Env()
-args = dotdict({'cpuct':2, 'iters':3})
-m = MCTS_best_leaf(env, model, args)
+if __name__ == "__main__":
+    model = Model()
+    env = Env()
+    args = dotdict({'cpuct':2, 'iters':22})
+    m = MCTS_best_leaf(env, model, args)
 
-node = m.find_best_leaf()
-m.expand(node)
 
-print(m.heap_best)
+    i, r = 0, 0
+    while (args.iters > i and not r) or 2 * args.iters > i:
+        node = m.find_best_leaf()
+        r = max(m.expand(node), r)
+        i += 1
+        #print(node.formula)
+
+    print(r, i)
+    for n in m.Nodes:
+        print(n, m.Nodes[n].fin_reward)
 
 
 
