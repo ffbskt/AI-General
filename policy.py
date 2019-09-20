@@ -106,7 +106,7 @@ class Model(nn.Module):
         self.fc2 = nn.Linear(82, 40)
         self.action_prob_out = nn.Linear(40, 8)
         #self.val0 = nn.Linear(40, 80)
-        self.val = nn.Linear(40, 1)
+        self.val = nn.Linear(40, 8)
 
     def forward(self, x):
 

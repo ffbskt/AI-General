@@ -37,8 +37,8 @@ class Env:
     action_space = dictionary + operation
     n_actions = len(action_space)
 
-    def __init__(self, formula='', inp=1, out=1):
-        self.formula = formula
+    def __init__(self, inp=1, out=1):
+        #self.formula = formula
         self.inp, self.out = inp, out
         self.result = {}
 
@@ -55,67 +55,68 @@ class Env:
         new_env.init_result()
         return new_env
 
-    def do_move(self, action):
-        self.formula += self.action_space[action]
-        self.calc_formula()
+    def do_move(self, formula, action):
+        formula += self.action_space[action]
+        #self.calc_formula(formula)
+        return self.game_end(formula), formula
 
         # print('env', self.formula, self.err, calc_formula(self.formula, self.inp)[1])
 
-    def game_end(self):
+    def game_end(self, formula):
         # return err, rew
-        self.calc_formula()
+        self.calc_formula(formula)
         if self.err:
             return -1
         if self.result['o'] == self.out and not self.err:
             return 1
-        is_end = 'o' in self.formula or len(self.formula) > 24 or self.err
+        is_end = 'o' in formula or len(formula) > 24 or self.err
         if is_end and self.result['o'] != self.out:
             return -1
         return 0
 
-    def calc_formula(self):
+    def calc_formula(self, formula):
         self.err = 0
         self.init_result()
         self.result['i'] = self.inp
-        for ind, comand in enumerate(self.formula):
+        for ind, comand in enumerate(formula):
             try:
 
-                if comand == 'e' and self.formula[ind + 1] in self.result:
-                    self.result[self.formula[ind + 1]] = self.result[self.formula[ind - 1]]
-                if comand == 's' and self.formula[ind + 1] in self.result:
-                    self.result[self.formula[ind + 1]] += self.result[self.formula[ind - 1]]
+                if comand == 'e' and formula[ind + 1] in self.result:
+                    self.result[formula[ind + 1]] = self.result[formula[ind - 1]]
+                if comand == 's' and formula[ind + 1] in self.result:
+                    self.result[formula[ind + 1]] += self.result[formula[ind - 1]]
                 # if comand=='s':
-                #    print('-', self.formula, end=' ')
+                #    print('-', formula, end=' ')
             except IndexError:
                 pass
             except (KeyError, TypeError, IndexError):
                 self.err = 1
 
-    def get_observation(self):
-        self.calc_formula()
-        net_observ = self.NN_input()
+    def get_observation(self, formula):
+        self.calc_formula(formula)
+        net_observ = self.NN_input(formula)
         return net_observ
 
-    def one_hot_last(self, n_last=4):
+    def one_hot_last(self, formula, n_last=4):
         act_sp = self.action_space
         matrix = np.zeros([n_last * len(act_sp)])
-        for i, f in enumerate(self.formula[-n_last:]):
-            k = n_last - min(len(self.formula), n_last)  # start from last line
+        for i, f in enumerate(formula[-n_last:]):
+            k = n_last - min(len(formula), n_last)  # start from last line
             matrix[act_sp.index(f) + (k + i) * 8] = 1
         return matrix
 
-    def NN_input(self):
+    def NN_input(self, formula):
         # values, err = calc_formula(formula, inp, env.result)
         values_norm = np.array(list(self.result.values()))
         inp, out, err = self.inp, self.out, self.err
-        if np.sum(values_norm) != 0:
-            values_norm = values_norm / np.sum(values_norm)
+        #if np.sum(values_norm) != 0:
+        #    values_norm = values_norm / np.sum(values_norm)
         s = inp + out
         inp = inp / s
         out = out / s
         if values_norm.shape[0] != 6:
-            print('ERROR', self.result, values_norm.shape, self.one_hot_last().shape)
-        head = np.hstack([np.array([inp, out, err]), values_norm, self.one_hot_last()])
+            print('ERROR', self.result, values_norm.shape, self.one_hot_last(formula).shape)
+        head = np.hstack([np.array([inp, out, err]), values_norm, self.one_hot_last(formula)])
         return head
 
 

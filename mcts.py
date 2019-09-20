@@ -1,6 +1,7 @@
 import numpy as np
 from env_test import Env
 from policy import Model
+from collections import defaultdict
 import heapq
 
 class dotdict(dict):
@@ -16,34 +17,57 @@ class Node:
         self.N = 0
         self.Q = 0
 
+    def __lt__(self, other):
+        return self.predR < other.predR
+
 class MCTS_best_leaf:
     """
         different algorithm. The Idea do not go down by tree choose best ucb node, except - we immediatly
-        compare only leafs and go to best leaf even parents branch has low ucb.
+        compare:
+     1) leafs and go to best leaf even parents branch has low ucb.
+     2) compute_Q - no value 
 
     """
     def __init__(self, env, model, args):
         self.env = env
-        node = Node(env.formula, 1, 0.5)
-        self.heap_best = heapq.heapify([(0, ),])
-        self.Ns = {node.formula: 0}
+        self.args = args
+        node = Node('', 1, 0.5)
+        self.heap_best = [node,]
+        self.Ns = defaultdict(int)
+        #self.Ns[node.formula]
         self.model = model
 
     def find_best_leaf(self):
-        return self.heap_best.heappop()
+        return heapq.heappop(self.heap_best)
 
     def expand(self, node):
         pred_P, pred_R = self.model.predict(self.env.get_observation(node.formula))
         self.up_prev_N(node.formula)
         for a in range(self.env.n_actions):
-            r, next_formula = self.env.step(node.formula, a)
-            Q = self.compute_Q()
+            r, next_formula = self.env.do_move(node.formula, a)
+            Q = self.compute_Q(pred_P[a], pred_R[a], next_formula)
+            node = Node(next_formula, pred_P[a], pred_R[a])
+            print(Q, node)
+            heapq.heappush(self.heap_best, node) ###&&&
 
     def up_prev_N(self, formula):
-        for i in len(formula):
+        for i in range(len(formula)):
             self.Ns[formula[:-i]] += 1
 
     def compute_Q(self, pred_P, pred_R, formula):
+        return pred_R + self.args.cpuct * pred_P * np.sqrt(self.Ns[formula[:-1]])
+
+
+#if __name__ == "__main__":
+model = Model()
+env = Env()
+args = dotdict({'cpuct':2, 'iters':3})
+m = MCTS_best_leaf(env, model, args)
+
+node = m.find_best_leaf()
+m.expand(node)
+
+print(m.heap_best)
 
 
 
@@ -98,23 +122,10 @@ class MCTS_best_leaf:
 
 
 
-
-
-
-
-
-if __name__ == "__main__":
-    policy_net = Policy()
-    for i in range(1):
-        root = Node(None, None, 1.)
-        #rew = plan_mcts(root, policy_net, replay_buffer, n_iters=500)
-        #policy_net.train_model(replay_buffer)
-        #reward.extend(rew)
-
-    import matplotlib.pyplot as plt
+#    import matplotlib.pyplot as plt
     #print(policy_net.loss_backet)    
-    plt.plot(policy_net.loss_backet)
-    plt.show()
+#    plt.plot(policy_net.loss_backet)
+#    plt.show()
     
 
 
