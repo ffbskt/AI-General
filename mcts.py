@@ -75,31 +75,86 @@ class MCTS_best_leaf:
         # print(formula, pred_R,  self.args.cpuct * pred_P * np.sqrt(self.Ns[formula[:-1]]), self.Ns[formula[:-1]], self.Ns, formula[:-1])
         return pred_R + self.args.cpuct * pred_P * np.sqrt(self.Nodes[formula[:-1]].N)
 
+    def sampling(self):
+        i, r = 0, 0
+        while (args.iters > i and not r) or 2 * args.iters > i:
+            node = m.find_best_leaf()
+            r = max(m.expand(node), r)
+            i += 1
+
+        # TODO add_real_reward(self.Nodes)
+        self.add_real_reward()
+
+        return self.Nodes.values()
+
+
+    def add_real_reward(self):
+        sorted_formulas = sorted(list(m.Nodes), key=lambda x: (m.Nodes[x].fin_reward, len(x)))
+        positive_ind = 1
+        for i, f in enumerate(sorted_formulas):
+            if self.Nodes[f].fin_reward > 0:
+                positive_ind = i
+            self.Nodes[f].fin_reward *= np.sqrt(positive_ind/(1 + i))
+
+
+
 
 if __name__ == "__main__":
     model = Model()
-    env = Env()
+    env = Env(inp=1, out=1)
+
     args = dotdict({'cpuct':2, 'iters':22})
     m = MCTS_best_leaf(env, model, args)
 
 
-    i, r = 0, 0
-    while (args.iters > i and not r) or 2 * args.iters > i:
-        node = m.find_best_leaf()
-        r = max(m.expand(node), r)
-        i += 1
-        #print(node.formula)
-
-    print(r, i)
-    for n in m.Nodes:
-        print(n, m.Nodes[n].fin_reward)
 
 
 
+    #m.add_real_reward()
+    #print(list(m.Nodes))
+    #print(sorted(list(m.Nodes), key=lambda x: (m.Nodes[x].fin_reward, len(x))))
+    #print([(k, len(k), n.fin_reward) for k, n in m.Nodes.items()])
+    # TODO net_train
+    #for n in m.sampling().items():
+    #    print(n)
+    from policy import NN_input
+
+    def prepare_input(env, inp, out, formula):
+        #env.formula = formula
+        env.inp, env.out = inp, out
+        env.calc_formula(formula)
+        values, err = env.result, env.err
+        net_observ = NN_input(inp, out, formula, values, err)
+        return net_observ
+
+
+    def get_batch(nodes_buc, batch_size=10):
+        n = len(nodes_buc)
+        index = [
+            np.random.randint(0, n - 1)
+            for _ in range(batch_size)
+        ]
+        #print(len(self.replay), index, [self.replay[i] for i in index]   )
+        return [nodes_buc[i] for i in index]
 
 
 
 
+
+    def train_model(nodes_buc):
+        for i in range(20):
+            batch = get_batch(nodes_buc, batch_size=10)
+            # print(batch)
+            X = np.vstack([prepare_input(env, env.inp, env.out, node.formula)
+                           for node in batch])
+            reward = np.vstack([np.array([node.fin_reward]) for node in batch])
+            probability = np.vstack([np.array([node.predP]) for node in batch])
+            model.training(X, reward, probability)
+
+
+    val = list(m.sampling())
+
+    train_model(val)
 
 
 

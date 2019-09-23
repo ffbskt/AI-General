@@ -108,6 +108,9 @@ class Model(nn.Module):
         #self.val0 = nn.Linear(40, 80)
         self.val = nn.Linear(40, 8)
 
+        self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.1, weight_decay=0.1)
+        self.loss_backet = []
+
     def forward(self, x):
 
         x = F.relu(self.fc1(x))
@@ -122,6 +125,15 @@ class Model(nn.Module):
         x = Variable(Tensor(x))
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
+
+    def training(self, X, reward, probability):
+        self.optimizer.zero_grad()
+        p_pred, v_pred = self.model(Variable(Tensor(X)))
+        val_loss = torch.min(torch.mean(Variable(Tensor(reward)) - v_pred ** 2), Variable(Tensor([10])))
+        loss = val_loss - torch.mean(Variable(Tensor(probability)) * torch.log(p_pred))
+        loss.backward()
+        self.optimizer.step()
+        self.loss_backet.append(loss.data.numpy())
 
    #def regularize(self):
    #    for w in model.parameters():
