@@ -123,14 +123,44 @@ class MCTS_best_leaf:
         return probs, rewards
 
 
+class RandomSample:
+    def __init__(self, env, model, args):
+        self.env = env
+        self.args = args
+        node = Node('', 1, 0.5)
+        self.Nodes = {'': node}
+        self.model = model
+
+    def sampling(self):
+        i, r = 0, 0
+        while (args.iters > i and not r) or 2 * args.iters > i:
+            formula_len = np.random.choice(range(24))
+            formula = ''
+            for step in range(formula_len):
+                pred_P, pred_R = self.model.predict(self.env.get_observation(formula))
+                # print(pred_P)
+                a = np.random.choice(range(8), p=pred_P)
+                r, formula = self.env.do_move(formula, a)
+                if formula not in self.Nodes:
+                    self.Nodes[formula] = Node(formula, pred_P, pred_R, fin_reward=r)
+                    if r:
+                        break
+
+            r = max(0, r)
+            i += 1
+
+            if r > 0:
+                print('!!', formula)
+
+        return self.Nodes.values()
 
 
 if __name__ == "__main__":
     model = Model()
-    env = Env(inp=1, out=1)
+    env = Env(inp=1, out=2)
 
     args = dotdict({'cpuct':2, 'iters':200})
-    m = MCTS_best_leaf(env, model, args)
+
 
 
 
@@ -187,10 +217,14 @@ if __name__ == "__main__":
             # print(prob)
             model.training_(X, reward, probability)
 
+    for i in range(4):
+        #m = MCTS_best_leaf(env, model, args)
+        #val = list(m.sampling())
+        #print(np.sum([m.Nodes[f].fin_reward > 0 for f in m.Nodes]), [(f.formula, f.predR) for f in get_batch(val)])
+        rsmp = RandomSample(env, model, args)
+        rand_val = list(rsmp.sampling())
 
-    val = list(m.sampling())
-
-    train_model(val)
+        #train_model(rand_val)
 
 
 
@@ -200,8 +234,8 @@ if __name__ == "__main__":
     #print(policy_net.loss_backet)    
     plt.plot(model.loss_backet)
     plt.show()
-    plt.plot(sorted([m.Nodes[f].Q for f in m.Nodes]))
-    plt.show()
+    #plt.plot(sorted([m.Nodes[f].Q for f in m.Nodes]))
+    #plt.show()
     
 
 
