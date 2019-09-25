@@ -95,12 +95,13 @@ class MCTS_best_leaf:
 
 
     def add_real_reward(self):
-        sorted_formulas = sorted(list(m.Nodes), key=lambda x: (m.Nodes[x].fin_reward, len(x)))
-        positive_ind = 1
+        sorted_formulas = sorted(list(self.Nodes), key=lambda x: (self.Nodes[x].fin_reward, len(x)))
+        for i, f in enumerate(sorted_formulas):
+            self.Nodes[f].fin_reward *= np.sqrt(1/(1 + i))
         for i, f in enumerate(sorted_formulas):
             if self.Nodes[f].fin_reward > 0:
-                positive_ind = i
-            self.Nodes[f].fin_reward *= np.sqrt(positive_ind/(1 + i))
+                for j in range(len(f)):
+                    self.Nodes[f[:j]].fin_reward += np.sqrt(j/(1 + i))
 
     def get_next_node_property(self, formula):
         """
@@ -217,14 +218,19 @@ if __name__ == "__main__":
             # print(prob)
             model.training_(X, reward, probability)
 
+    def show_batch_ard_reward(m):
+        print(np.sum([m.Nodes[f].fin_reward > 0 for f in m.Nodes]),
+                        [(f.formula, f.predR) for f in get_batch(list(m.Nodes.values()))])
+
     for i in range(4):
         #m = MCTS_best_leaf(env, model, args)
         #val = list(m.sampling())
-        #print(np.sum([m.Nodes[f].fin_reward > 0 for f in m.Nodes]), [(f.formula, f.predR) for f in get_batch(val)])
+
         rsmp = RandomSample(env, model, args)
         rand_val = list(rsmp.sampling())
+        show_batch_ard_reward(rsmp)
 
-        #train_model(rand_val)
+        train_model(rand_val)
 
 
 
