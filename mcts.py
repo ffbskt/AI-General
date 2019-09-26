@@ -14,6 +14,7 @@ class Node:
         self.children = set()
         if parent:
             self.immediate_reward, self.formula = env.do_move(parent.formula, action)
+            if self.immediate_reward > 0: print("!!-----------------------------", self.formula)
         else:
             self.immediate_reward, self.formula = 0.0, ''
 
@@ -56,6 +57,7 @@ class MCTS:
     def select_best_leaf(self):
         node = self.root
         while not node.is_leaf():
+            #print(node.formula, [i.value_sum for i in node.children])
             node = max(node.children, key=lambda x: x.ucb_score())
         return node
 
@@ -63,19 +65,23 @@ class MCTS:
         for action, prob in enumerate(action_priors):
             node.children.add(Node(node, action, prob, self.env))
 
-    def propagate(self, node):
+    def propagate(self, node, fogot=0.9):
+        #print(1, node.formula,node.immediate_reward, node.value_sum)
+        node.value_sum += node.immediate_reward
+        node.times_visited += 1
         while node.parent:
-            child_val = node.immediate_reward
+            child_val = node.value_sum
             node = node.parent
-            node.value_sum += child_val
+            node.value_sum += fogot * child_val
             node.times_visited += 1
 
     def sampling(self):
         i, r = 0, 0
         while (self.args.iters > i and not r) or 2 * self.args.iters > i:
             node = self.select_best_leaf()
+            #if node.parent is not None: print(node.formula, node.immediate_reward)
             r = node.immediate_reward
-            #if node.parent:
+            #if r: print(node.formula)
             self.Nodes[node.formula] = node
             if r:
                 self.propagate(node)
@@ -93,17 +99,19 @@ if __name__ == "__main__":
     from env_test import Env
 
     model = models.Model()
-    env = Env(inp=1, out=2)
+    env = Env(inp=1, out=1)
 
     #from pipeline import dotdict
     class dotdict(dict):
         def __getattr__(self, name):
             return self[name]
 
-    args = dotdict({'cpuct': 2, 'iters': 20})
+    args = dotdict({'cpuct': 2, 'iters': 2000})
 
     rsmp = MCTS(env, model, args)
     rand_val = list(rsmp.sampling())
 
-    print([(f.formula, f.immediate_reward) for f in rand_val])
+    print([(f.formula, f.immediate_reward, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
+    print([(f.formula, f.immediate_reward, f.ucb_score(), f.times_visited) for f in rand_val if
+           f.formula[:1] == 'i' and len(f.formula) < 3])
 
