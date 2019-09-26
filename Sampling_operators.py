@@ -113,7 +113,7 @@ class RandomSampling(Sampling_operator):
 
             #if r > 0:
             #    print('!!', formula)
-            self.recompute_r_p(0.01)
+            #self.recompute_r_p(0.01)
 
 
         return self.Nodes.values()
@@ -128,6 +128,8 @@ class RandomSampling(Sampling_operator):
                         self.Nodes[f[:i]].fin_reward[ind] += coef / (len(f) - i)
                         self.Nodes[f[:i]].fin_prob[ind] += coef / (len(f) - i)
                         self.Nodes[f[:i]].fin_prob = softmax(self.Nodes[f[:i]].fin_prob)
+
+
 
 
 
