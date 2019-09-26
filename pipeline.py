@@ -19,9 +19,11 @@ args = dotdict({'cpuct':2, 'iters':100})
 def take_best(nodes):
 
     #print(len(nodes) // 4, len(nodes), nodes[-1].fin_reward)
-    return sorted(nodes, key=lambda x: (max(x.fin_reward)), reverse=True)[:len(nodes) // 64]
+    return sorted(nodes, key=lambda x: (max(x.fin_reward)), reverse=True)[:len(nodes) // 24]
 
-for i in range(30):
+examples = deque([], maxlen=1000)
+
+for i in range(10):
         #m = MCTS_best_leaf(env, model, args)
         #val = list(m.sampling())
         #print(np.sum([m.Nodes[f].fin_reward > 0 for f in m.Nodes]), [(f.formula, f.predR) for f in get_batch(val)])
@@ -29,11 +31,13 @@ for i in range(30):
     rand_val = list(rsmp.sampling())
 
     #print(sorted([max(x.fin_reward) for x in rand_val]))
-    rand_val = take_best(rand_val)
+    #rand_val = take_best(rand_val)
     #print([max(x.fin_reward) for x in rand_val])
     print('dd', rand_val[0].fin_reward, len(rand_val))
     shuffle(rand_val)
-    t.train_model(rand_val, model)
+
+    examples += rand_val
+    t.train_model(examples, model)
     print(rsmp.sum_reward)
 
 
