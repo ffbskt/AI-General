@@ -13,6 +13,7 @@ model = Model()
 env = Env()
 t = Trainer(env, model, batch_size=30)
 args = dotdict({'cpuct':2, 'iters':100})
+examples = deque([], maxlen=1000)
 
 
 
@@ -21,7 +22,10 @@ def take_best(nodes):
     #print(len(nodes) // 4, len(nodes), nodes[-1].fin_reward)
     return sorted(nodes, key=lambda x: (max(x.fin_reward)), reverse=True)[:len(nodes) // 24]
 
-examples = deque([], maxlen=1000)
+
+
+
+
 
 for i in range(10):
         #m = MCTS_best_leaf(env, model, args)

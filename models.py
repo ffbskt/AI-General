@@ -16,8 +16,8 @@ class Model(nn.Module):
         #self.val0 = nn.Linear(40, 80)
         self.val = nn.Linear(40, 8)
 
-        self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.1, weight_decay=0.1)
-        self.loss_backet = []
+        #self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.1, weight_decay=0.1)
+        #self.loss_backet = []
 
     def forward(self, x):
 
@@ -38,7 +38,7 @@ class Model(nn.Module):
 
 
 class Trainer:
-    def __init__(self, env, states=None, batch_size=10):
+    def __init__(self, env, batch_size=10):
         self.env = env
         self.batch_size = batch_size
         self.loss_backet = []
@@ -70,11 +70,11 @@ class Trainer:
 
 
 
-    def train_model(self, nodes_buc, model):
-        self.optimizer = optim.SGD(model.parameters(), lr=0.04, momentum=0.1, weight_decay=0.1)
+    def train_model(self, nodes_buc, model, batch_size=0, net_iters=200):
+        self.optimizer = optim.SGD(model.parameters(), lr=0.9, momentum=0.3, weight_decay=0.1)
 
-        for i in range(200):
-            batch = self.get_batch(nodes_buc, batch_size=35)
+        for i in range(net_iters):
+            batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
             # print(batch)
 
             X, real_reward, real_prob = self.transform_bach_as_input(batch)
@@ -88,3 +88,57 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             self.loss_backet.append(loss.data.numpy())
+
+
+class mctsTrainer(Trainer):
+    def __init__(self, env, mcts, batch_size=10):
+        Trainer.__init__(self, env=env, batch_size=batch_size)
+        self.mcts = mcts
+
+    def transform_bach_as_input(self, batch):
+        X = []
+        real_prob = []
+        real_reward = []
+        for node in batch:
+            self.env.calc_formula(node.formula)
+            net_observ = self.env.NN_input(node.formula)
+            X.append(net_observ)
+            prob = np.zeros(self.env.n_actions)
+            reward = np.zeros(self.env.n_actions)
+            for i, a in enumerate(self.env.action_space):
+                if node.formula + a in self.mcts.Nodes:
+                    prob[i] = self.mcts.Nodes[node.formula + a].fin_prob
+                    reward[i] = self.mcts.Nodes[node.formula + a].ucb_score()
+                #print()
+            real_prob.append(prob) # matrix size(8, 1) of next (f+a) prob
+            real_reward.append(reward)
+        X = np.vstack(X)
+        real_prob = np.vstack(real_prob)
+        real_reward = np.vstack(real_reward)
+        return X, real_reward, real_prob
+
+if __name__ == "__main__":
+    from env_test import Env
+    from mcts import MCTS
+
+    class dotdict(dict):
+        def __getattr__(self, name):
+            return self[name]
+
+    model = Model()
+    env = Env()
+
+    args = dotdict({'cpuct':2, 'iters':10000})
+    rsmp = MCTS(env, model, args)
+    val = list(rsmp.sampling())
+    t = mctsTrainer(env, rsmp, batch_size=30)
+    t.train_model(val, model, net_iters=1000)
+    #examples = deque([], maxlen=1000)
+
+    #batch = t.get_batch(val, batch_size=5)
+    #for b in t.transform_bach_as_input(batch):
+    #    print(b)
+    import matplotlib.pyplot as plt
+
+    plt.plot(t.loss_backet)
+    plt.show()
