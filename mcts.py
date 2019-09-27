@@ -65,7 +65,9 @@ class MCTS:
 
     def expand(self, node, action_priors):
         for action, prob in enumerate(action_priors):
-            node.children.add(Node(node, action, prob, self.env))
+            next_node = Node(node, action, prob, self.env)
+            node.children.add(next_node)
+            # self.Nodes[next_node.formula] = next_node
 
     def propagate(self, node, fogot=0.9):
         #print(1, node.formula,node.immediate_reward, node.value_sum)
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     from env_test import Env
 
     model = models.Model()
-    args = dotdict({'cpuct': 2, 'iters': 1000})
+    args = dotdict({'cpuct': 1, 'iters': 1000})
     env = Env(inp=1, out=1)
     rsmp = MCTS(env, model, args)
     rand_val = []

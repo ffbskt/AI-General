@@ -97,7 +97,7 @@ class Env:
         net_observ = self.NN_input(formula)
         return net_observ
 
-    def one_hot_last(self, formula, n_last=4):
+    def one_hot_last(self, formula, n_last=1):
         act_sp = self.action_space
         matrix = np.zeros([n_last * len(act_sp)])
         for i, f in enumerate(formula[-n_last:]):

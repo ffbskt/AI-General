@@ -10,8 +10,9 @@ import torch.nn.functional as F
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.fc1 = nn.Linear(41, 82)
-        self.fc2 = nn.Linear(82, 40)
+        self.cnv1 = nn.Conv1d(1,6,8)
+        self.fc1 = nn.Linear(60, 182)
+        self.fc2 = nn.Linear(182, 40)
         self.action_prob_out = nn.Linear(40, 8)
         #self.val0 = nn.Linear(40, 80)
         self.val = nn.Linear(40, 8)
@@ -20,7 +21,11 @@ class Model(nn.Module):
         #self.loss_backet = []
 
     def forward(self, x):
-
+        #print(x.shape)
+        #x = x.view(-1,17)
+        x = self.cnv1(x.view(1, 1,-1))
+        # print(x.shape)
+        x = torch.flatten(x, start_dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         act_prob = F.softmax(self.action_prob_out(x), dim=-1)
@@ -30,6 +35,7 @@ class Model(nn.Module):
         return act_prob, val
 
     def predict(self, x):
+        self.eval()
         x = Variable(Tensor(x))
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
@@ -80,11 +86,13 @@ class Trainer:
             X, real_reward, real_prob = self.transform_bach_as_input(batch)
 
             self.optimizer.zero_grad()
+            print(i, X.shape)
+            model.train()
             p_pred, v_pred = model(Variable(Tensor(X)))
             # print('pr  ', probability, 'pp  ', p_pred)
             val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
-            loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-            #loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            #loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
             loss.backward()
             self.optimizer.step()
             self.loss_backet.append(loss.data.numpy())
@@ -108,7 +116,9 @@ class mctsTrainer(Trainer):
             for i, a in enumerate(self.env.action_space):
                 if node.formula + a in self.mcts.Nodes:
                     prob[i] = self.mcts.Nodes[node.formula + a].fin_prob
-                    reward[i] = self.mcts.Nodes[node.formula + a].ucb_score()
+                    g = self.mcts.Nodes[node.formula + a].ucb_score()
+                    # print(g, node.formula + a, node.formula, a, self.mcts.Nodes)
+                    reward[i] = g
                 #print()
             real_prob.append(prob) # matrix size(8, 1) of next (f+a) prob
             real_reward.append(reward)
@@ -128,16 +138,19 @@ if __name__ == "__main__":
     model = Model()
     env = Env()
 
-    args = dotdict({'cpuct':2, 'iters':10000})
+    args = dotdict({'cpuct':0.5, 'iters':1000})
     rsmp = MCTS(env, model, args)
     val = list(rsmp.sampling())
-    t = mctsTrainer(env, rsmp, batch_size=30)
-    t.train_model(val, model, net_iters=1000)
+    print(len(val))
+    val = [v for v in val if v.parent and v.parent.times_visited > 2]
+    print(len(val))
+    t = mctsTrainer(env, rsmp, batch_size=50)
+    t.train_model(val, model, net_iters=300)
     #examples = deque([], maxlen=1000)
 
-    #batch = t.get_batch(val, batch_size=5)
-    #for b in t.transform_bach_as_input(batch):
-    #    print(b)
+    batch = t.get_batch(val, batch_size=5)
+    for b in t.transform_bach_as_input(batch):
+        print(b)
     import matplotlib.pyplot as plt
 
     plt.plot(t.loss_backet)
