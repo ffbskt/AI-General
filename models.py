@@ -11,7 +11,7 @@ class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
         self.cnv1 = nn.Conv1d(1,6,8)
-        self.fc1 = nn.Linear(60, 182)
+        self.fc1 = nn.Linear(17, 182)
         self.fc2 = nn.Linear(182, 40)
         self.action_prob_out = nn.Linear(40, 8)
         #self.val0 = nn.Linear(40, 80)
@@ -23,9 +23,9 @@ class Model(nn.Module):
     def forward(self, x):
         #print(x.shape)
         #x = x.view(-1,17)
-        x = self.cnv1(x.view(1, 1,-1))
+        #x = self.cnv1(x.view(1, 1,-1))
         # print(x.shape)
-        x = torch.flatten(x, start_dim=1)
+        #x = torch.flatten(x, start_dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         act_prob = F.softmax(self.action_prob_out(x), dim=-1)
@@ -86,7 +86,7 @@ class Trainer:
             X, real_reward, real_prob = self.transform_bach_as_input(batch)
 
             self.optimizer.zero_grad()
-            print(i, X.shape)
+            #print(i, X.shape)
             model.train()
             p_pred, v_pred = model(Variable(Tensor(X)))
             # print('pr  ', probability, 'pp  ', p_pred)
