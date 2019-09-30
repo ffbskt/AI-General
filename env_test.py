@@ -80,8 +80,9 @@ class Env:
         self.result['i'] = self.inp
         for ind, comand in enumerate(formula):
             try:
-
+                if ind < 1: continue
                 if comand == 'e' and formula[ind + 1] in self.result:
+                    #print(self.result[formula[ind - 1]], formula[ind - 1])
                     self.result[formula[ind + 1]] = self.result[formula[ind - 1]]
                 if comand == 's' and formula[ind + 1] in self.result:
                     self.result[formula[ind + 1]] += self.result[formula[ind - 1]]
@@ -121,14 +122,15 @@ class Env:
 
 
 if __name__ == "__main__":
-    fstr = 'ieo'
-    fstr = 'ieo'  # '1eAAsAAsAisAAeo'
+    fstr = 'eBCAi'
+    #fstr = 'ieo'  # '1eAAsAAsAisAAeo'
     # print(emb_formula(fstr, formula_dict))
     # print(emb_command(fstr, 3, command_dict).values())
     # print(Env.calc_formula())
 
-    e = Env(fstr)
-    e.do_move(6)
-    print(e.game_end(), e.formula)
-    print(e.get_observation())
-    print(e.env_reset_new(), e.env_reset_new().result)
+    e = Env(1,1)
+    #e.do_move(fstr, 6)
+    e.calc_formula(fstr)
+    print(e.result)
+    #print(e.get_observation())
+    #print(e.env_reset_new(), e.env_reset_new().result)
