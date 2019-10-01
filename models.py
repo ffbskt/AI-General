@@ -127,6 +127,48 @@ class mctsTrainer(Trainer):
         real_reward = np.vstack(real_reward)
         return X, real_reward, real_prob
 
+
+class LSTMModel(nn.Module):
+
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
+        super(LSTMTagger, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.embedding_dim = embedding_dim
+
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim)
+
+        # The linear layer that maps from hidden state space to tag space
+        self.aprob_pred = nn.Linear(hidden_dim, vocab_size)
+        self.val_pred = nn.Linear(hidden_dim, vocab_size)
+        self.result_pred = nn.Linear(hidden_dim, vocab_size)
+
+    def forward(self, sentence):
+        slen, b_sz, ind_s = sentence.shape
+        embeds = self.word_embeddings(sentence)
+        # print(embeds.shape, embeds.view(len(sentence), 1, -1))
+        lstm_out, hidden = self.lstm(embeds.view(len(sentence), 1, self.embedding_dim))
+        hidden = hidden[0].view(b_sz, self.hidden_dim)
+        aprob_pred = F.log_softmax(self.aprob_pred(hidden), dim=1)
+        val_pred = self.val_pred(hidden)
+        result_pred = self.result_pred(hidden)
+        return aprob_pred, val_pred, result_pred
+
+    def predict(self, x):
+        self.eval()
+        # x = Variable(torch.LongTensor(x))
+        act_prob, val, _ = self.forward(x)
+        return act_prob.data.numpy(), val.data.numpy()
+
+    def get_observation(self, formula, env):
+        return Variable(torch.LongTensor(np.array([env.action_space.index(a) for a in formula])))
+
+
+#model = LSTMModel(4, 32, 8, 8)
+
 if __name__ == "__main__":
     from env_test import Env
     from mcts import MCTS
@@ -136,6 +178,7 @@ if __name__ == "__main__":
             return self[name]
 
     model = Model()
+    model = LSTMModel(4, 32, 8, 8)
     env = Env()
 
     args = dotdict({'cpuct':0.5, 'iters':1000})
