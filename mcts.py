@@ -95,7 +95,11 @@ class MCTS:
             if r:
                 self.propagate(node)
             else:
-                pred_P, pred_R = self.model.predict(self.env.get_observation(node.formula))
+                if not node.formula:
+                    pred_P, pred_R = np.ones([8]) / 8, np.ones([8]) / 8
+                else:
+                    pred_P, pred_R = self.model.predict(self.model.get_observation(node.formula, self.env)) # if simple model self.env.observation
+                    #print(node.formula, pred_P, pred_R)
                 self.expand(node, pred_P)
 
             r = max(0, r)

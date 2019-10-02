@@ -39,6 +39,10 @@ class Model(nn.Module):
         x = Variable(Tensor(x))
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
+    
+    def get_observation(self, formula, env):
+        #print(formula)
+        return Variable(Tensor(env.get_observation(formula)))
 
 
 
@@ -131,7 +135,7 @@ class mctsTrainer(Trainer):
 class LSTMModel(nn.Module):
 
     def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
-        super(LSTMTagger, self).__init__()
+        super(LSTMModel, self).__init__()
         self.hidden_dim = hidden_dim
         self.embedding_dim = embedding_dim
 
@@ -152,7 +156,7 @@ class LSTMModel(nn.Module):
         # print(embeds.shape, embeds.view(len(sentence), 1, -1))
         lstm_out, hidden = self.lstm(embeds.view(len(sentence), 1, self.embedding_dim))
         hidden = hidden[0].view(b_sz, self.hidden_dim)
-        aprob_pred = F.log_softmax(self.aprob_pred(hidden), dim=1)
+        aprob_pred = F.softmax(self.aprob_pred(hidden), dim=1)
         val_pred = self.val_pred(hidden)
         result_pred = self.result_pred(hidden)
         return aprob_pred, val_pred, result_pred
@@ -164,7 +168,8 @@ class LSTMModel(nn.Module):
         return act_prob.data.numpy(), val.data.numpy()
 
     def get_observation(self, formula, env):
-        return Variable(torch.LongTensor(np.array([env.action_space.index(a) for a in formula])))
+        #print(formula)
+        return Variable(torch.LongTensor(np.array([env.action_space.index(a) for a in formula]).reshape([-1, 1, 1])))
 
 
 #model = LSTMModel(4, 32, 8, 8)
@@ -177,7 +182,7 @@ if __name__ == "__main__":
         def __getattr__(self, name):
             return self[name]
 
-    model = Model()
+    #model = Model()
     model = LSTMModel(4, 32, 8, 8)
     env = Env()
 
