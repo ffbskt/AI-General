@@ -11,9 +11,9 @@ class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
         self.cnv1 = nn.Conv1d(1,6,8)
-        self.fc1 = nn.Linear(17, 182)
+        self.fc1 = nn.Linear(18, 182)
         self.fc2 = nn.Linear(182, 40)
-        self.action_prob_out = nn.Linear(40, 1)
+        self.action_prob_out = nn.Linear(40, 8)
         #self.val0 = nn.Linear(40, 80)
         self.val = nn.Linear(40, 1)
 
@@ -53,7 +53,15 @@ class Trainer:
         self.batch_size = batch_size
         self.loss_backet = []
 
+    def clean_unpredict_node(self, nodes_buc):
+        new_buck = []
+        for node in nodes_buc:
+            if len(node.history_data['next_node_ind']):
+                new_buck.append(node)
+        return new_buck
+
     def get_batch(self, nodes_buc, batch_size=0):
+        """remove all nodes that have not history"""
         n = len(nodes_buc)
         index = [
             np.random.randint(0, n - 1)
@@ -66,12 +74,23 @@ class Trainer:
         X = []
         real_prob = []
         real_reward = []
+        #print(batch)
+
         for node in batch:
-            self.env.calc_formula(node.formula)
-            net_observ = self.env.NN_input(node.formula)
+            i = np.random.randint(0, len(node.history_data['time']))
+            #if node.parent:
+            #self.env.calc_formula(node.parent.formula)
+
+
+            net_observ = self.env.get_observation(node.formula, node.history_data['time'][i])
             X.append(net_observ)
-            real_prob.append(node.fin_prob) # matrix size(8, 1) of next (f+a) prob
-            real_reward.append(node.fin_reward)
+            p_next = np.zeros(self.env.n_actions)
+            p_next[node.history_data['next_node_ind'][i]] = 1
+            real_prob.append(p_next) # matrix size(8, 1) of next (f+a) prob
+            t = node.history_data['time'][i]
+            parent_i = node.parent.history_data['time'].index(t-1)
+            real_reward.append(node.parent.history_data['next_node_val'][parent_i])
+            #print('ss', X)
         X = np.vstack(X)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
@@ -80,8 +99,8 @@ class Trainer:
 
 
 
-    def train_model(self, nodes_buc, model, batch_size=0, net_iters=200):
-        self.optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.3, weight_decay=0.1)
+    def train_model(self, nodes_buc, model, batch_size=10, net_iters=200):
+        self.optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.3, weight_decay=0.1)
 
         for i in range(net_iters):
             batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
@@ -92,27 +111,24 @@ class Trainer:
 
             #print(i, real_prob.shape)
             model.train()
-            for x, rr, rp in zip(X, real_reward, real_prob):
-                #print(x)
-                for xx, rrr, rpp in zip(x, rr, rp):
-                    rpp = np.array(rpp)
-                    rrr = np.array(rrr)
-                    #print(xx, rrr,rpp)
-                    self.optimizer.zero_grad()
-                    p_pred, v_pred = model(Variable(Tensor(xx)))
-                    # print('pr  ', probability, 'pp  ', p_pred)
-                    val_loss = torch.mean((Variable(Tensor(rrr)) - v_pred) ** 2)  # , Variable(Tensor([10]))
-                    loss = val_loss #- torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-                    #loss = - torch.mean(Variable(Tensor(rpp)) * torch.log(p_pred))
-                    #print(loss, rpp, p_pred)
-                    loss.backward()
-                    self.optimizer.step()
-                    self.loss_backet.append(loss.data.numpy())
+            #for x, rr, rp in zip(X, real_reward, real_prob):
+                #print(xx, rrr,rpp)
+            self.optimizer.zero_grad()
+            #print(X)
+            p_pred, v_pred = model(Variable(Tensor(X)))
+            # print('pr  ', probability, 'pp  ', p_pred)
+            val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
+            loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            #loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            #print(loss, rpp, p_pred)
+            loss.backward()
+            self.optimizer.step()
+            self.loss_backet.append(loss.data.numpy())
 
 
 
 class mctsTrainer(Trainer):
-    def __init__(self, env, mcts, batch_size=10):
+    def __init__(self, env, mcts, batch_size=80):
         Trainer.__init__(self, env=env, batch_size=batch_size)
         self.mcts = mcts
 
@@ -200,19 +216,24 @@ if __name__ == "__main__":
     env = Env()
 
     args = dotdict({'cpuct':0.5, 'iters':1000})
-    rsmp = MCTS(env, model, args)
-    val = list(rsmp.sampling())
+    mcts = MCTS(env, model, args)
+    val = list(mcts.sampling())
     print(len(val))
     val = [v for v in val if v.parent and v.parent.times_visited > 2]
     print(len(val))
-    t = mctsTrainer(env, rsmp, batch_size=50)
+
+
+    #t = mctsTrainer(env, mcts, batch_size=50)
+    t = Trainer(env, batch_size=20)
+    val = t.clean_unpredict_node(val)
+    print('aa', val)
     t.train_model(val, model, net_iters=300)
-    #examples = deque([], maxlen=1000)
+    # #examples = deque([], maxlen=1000)
+    #
+    batch = t.get_batch(val)
+    print(list(t.transform_bach_as_input(batch)[1]))
 
-    batch = t.get_batch(val, batch_size=5)
-    for b in t.transform_bach_as_input(batch):
-        print(b)
     import matplotlib.pyplot as plt
-
+    #
     plt.plot(t.loss_backet)
     plt.show()

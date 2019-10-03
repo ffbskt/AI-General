@@ -106,7 +106,7 @@ class Env:
             matrix[act_sp.index(f) + (k + i) * 8] = 1
         return matrix
 
-    def NN_input(self, formula):
+    def NN_input(self, formula, time=0):
         # values, err = calc_formula(formula, inp, env.result)
         values_norm = np.array(list(self.result.values()))
         inp, out, err = self.inp, self.out, self.err
@@ -117,7 +117,8 @@ class Env:
         out = out / s
         if values_norm.shape[0] != 6:
             print('ERROR', self.result, values_norm.shape, self.one_hot_last(formula).shape)
-        head = np.hstack([np.array([inp, out, err]), values_norm, self.one_hot_last(formula)])
+        time = np.sin(time/100)
+        head = np.hstack([np.array([inp, out, err, time]), values_norm, self.one_hot_last(formula)])
         return head
 
 

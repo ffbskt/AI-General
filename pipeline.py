@@ -1,4 +1,5 @@
-from Sampling_operators import RandomSampling
+#from Sampling_operators import RandomSampling
+
 from models import Model, Trainer
 from  env_test import Env
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ class dotdict(dict):
 model = Model()
 env = Env()
 t = Trainer(env, model, batch_size=30)
-args = dotdict({'cpuct':2, 'iters':100})
+args = dotdict({'cpuct':2, 'iters':1000})
 examples = deque([], maxlen=1000)
 
 

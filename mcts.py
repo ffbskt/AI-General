@@ -140,15 +140,16 @@ if __name__ == "__main__":
         print(123)
         rand_val += list(rsmp.sampling())
 
-    print([f.formula for f in rand_val])
-    print('T', rsmp.iter_timer)
+    #print([f.formula for f in rand_val])
+    print('T', rsmp.iter_timer, 'ss')
 
-    print([(f.formula, f.immediate_reward, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
+    #print([(f.formula, f.history_data, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
     print([(f.formula, f.fin_prob, f.ucb_score(), f.get_mean_value(), f.times_visited) for f in rand_val if
            f.formula[:1] == 'i' and len(f.formula) < 3])
     print(rsmp.Nodes[''].times_visited)
 
     import matplotlib.pyplot as plt
-    plt.plot([f.ucb_score() for f in rand_val if f.formula != ''])
+    #plt.plot([f.ucb_score() for f in rand_val if f.formula != ''])
+    plt.plot(rsmp.Nodes['ie'].history_data['time'])
     plt.show()
 
