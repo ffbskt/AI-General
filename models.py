@@ -87,10 +87,15 @@ class Trainer:
             p_next = np.zeros(self.env.n_actions)
             p_next[node.history_data['next_node_ind'][i]] = 1
             real_prob.append(p_next) # matrix size(8, 1) of next (f+a) prob
-            t = node.history_data['time'][i]
-            parent_i = node.parent.history_data['time'].index(t-1)
-            real_reward.append(node.parent.history_data['next_node_val'][parent_i])
-            #print('ss', X)
+
+            # real value from past
+            if node.parent:
+                t = node.history_data['time'][i]
+                parent_i = node.parent.history_data['time'].index(t-1)
+                real_reward.append(node.parent.history_data['next_node_val'][parent_i])
+                #print('ss', X)
+            else:
+                real_reward.append(node.history_data['next_node_val'][i])
         X = np.vstack(X)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
@@ -118,8 +123,8 @@ class Trainer:
             p_pred, v_pred = model(Variable(Tensor(X)))
             # print('pr  ', probability, 'pp  ', p_pred)
             val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
-            loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-            #loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            #loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
             #print(loss, rpp, p_pred)
             loss.backward()
             self.optimizer.step()
@@ -224,14 +229,19 @@ if __name__ == "__main__":
 
 
     #t = mctsTrainer(env, mcts, batch_size=50)
+
     t = Trainer(env, batch_size=20)
-    val = t.clean_unpredict_node(val)
-    print('aa', val)
-    t.train_model(val, model, net_iters=300)
+    for i in range(10):
+        print(i, t.loss_backet[-3:])
+        mcts = MCTS(env, model, args)
+        val = list(mcts.sampling())
+        val = t.clean_unpredict_node(val)
+        #print('aa', val)
+        t.train_model(val, model, net_iters=300)
     # #examples = deque([], maxlen=1000)
     #
-    batch = t.get_batch(val)
-    print(list(t.transform_bach_as_input(batch)[1]))
+    #batch = t.get_batch(val)
+    #print(list(t.transform_bach_as_input(batch)[1]))
 
     import matplotlib.pyplot as plt
     #
