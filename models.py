@@ -13,9 +13,9 @@ class Model(nn.Module):
         self.cnv1 = nn.Conv1d(1,6,8)
         self.fc1 = nn.Linear(17, 182)
         self.fc2 = nn.Linear(182, 40)
-        self.action_prob_out = nn.Linear(40, 8)
+        self.action_prob_out = nn.Linear(40, 1)
         #self.val0 = nn.Linear(40, 80)
-        self.val = nn.Linear(40, 8)
+        self.val = nn.Linear(40, 1)
 
         #self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.1, weight_decay=0.1)
         #self.loss_backet = []
@@ -40,9 +40,9 @@ class Model(nn.Module):
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
     
-    def get_observation(self, formula, env):
+    def get_observation(self, formula, env, time):
         #print(formula)
-        return Variable(Tensor(env.get_observation(formula)))
+        return Variable(Tensor(env.get_observation(formula, time)))
 
 
 
@@ -81,7 +81,7 @@ class Trainer:
 
 
     def train_model(self, nodes_buc, model, batch_size=0, net_iters=200):
-        self.optimizer = optim.SGD(model.parameters(), lr=0.9, momentum=0.3, weight_decay=0.1)
+        self.optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.3, weight_decay=0.1)
 
         for i in range(net_iters):
             batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
@@ -89,17 +89,26 @@ class Trainer:
 
             X, real_reward, real_prob = self.transform_bach_as_input(batch)
 
-            self.optimizer.zero_grad()
-            #print(i, X.shape)
+
+            #print(i, real_prob.shape)
             model.train()
-            p_pred, v_pred = model(Variable(Tensor(X)))
-            # print('pr  ', probability, 'pp  ', p_pred)
-            val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
-            #loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-            loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-            loss.backward()
-            self.optimizer.step()
-            self.loss_backet.append(loss.data.numpy())
+            for x, rr, rp in zip(X, real_reward, real_prob):
+                #print(x)
+                for xx, rrr, rpp in zip(x, rr, rp):
+                    rpp = np.array(rpp)
+                    rrr = np.array(rrr)
+                    #print(xx, rrr,rpp)
+                    self.optimizer.zero_grad()
+                    p_pred, v_pred = model(Variable(Tensor(xx)))
+                    # print('pr  ', probability, 'pp  ', p_pred)
+                    val_loss = torch.mean((Variable(Tensor(rrr)) - v_pred) ** 2)  # , Variable(Tensor([10]))
+                    loss = val_loss #- torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+                    #loss = - torch.mean(Variable(Tensor(rpp)) * torch.log(p_pred))
+                    #print(loss, rpp, p_pred)
+                    loss.backward()
+                    self.optimizer.step()
+                    self.loss_backet.append(loss.data.numpy())
+
 
 
 class mctsTrainer(Trainer):
@@ -112,13 +121,17 @@ class mctsTrainer(Trainer):
         real_prob = []
         real_reward = []
         for node in batch:
-            self.env.calc_formula(node.formula)
-            net_observ = self.env.NN_input(node.formula)
-            X.append(net_observ)
+
+
+            X.append([])
+            #XX = np.zeros(self.env.n_actions, )
             prob = np.zeros(self.env.n_actions)
             reward = np.zeros(self.env.n_actions)
             for i, a in enumerate(self.env.action_space):
                 if node.formula + a in self.mcts.Nodes:
+                    self.env.calc_formula(node.formula + a)
+                    net_observ = self.env.NN_input(node.formula + a)
+                    X[-1].append(net_observ)
                     prob[i] = self.mcts.Nodes[node.formula + a].fin_prob
                     g = self.mcts.Nodes[node.formula + a].ucb_score()
                     # print(g, node.formula + a, node.formula, a, self.mcts.Nodes)
@@ -126,7 +139,7 @@ class mctsTrainer(Trainer):
                 #print()
             real_prob.append(prob) # matrix size(8, 1) of next (f+a) prob
             real_reward.append(reward)
-        X = np.vstack(X)
+        #X = np.vstack(X)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
         return X, real_reward, real_prob
@@ -182,8 +195,8 @@ if __name__ == "__main__":
         def __getattr__(self, name):
             return self[name]
 
-    #model = Model()
-    model = LSTMModel(4, 32, 8, 8)
+    model = Model()
+    #model = LSTMModel(4, 32, 8, 8)
     env = Env()
 
     args = dotdict({'cpuct':0.5, 'iters':1000})

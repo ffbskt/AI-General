@@ -11,6 +11,7 @@ class Node:
         self.parent = parent
         self.action = action
         self.P = prob
+        self.history_data = {'time':[], 'next_node_ind':[], 'next_node_val':[]}
         self.children = set()
         if parent:
             self.immediate_reward, self.formula = env.do_move(parent.formula, action)
@@ -54,13 +55,19 @@ class MCTS:
         self.Nodes = {'': node}
         self.sum_reward = 0
         self.root = Node()
+        self.iter_timer = 0
 
 
     def select_best_leaf(self):
         node = self.root
         while not node.is_leaf():
-            #print(node.formula, [i.value_sum for i in node.children])
-            node = max(node.children, key=lambda x: x.ucb_score())
+            self.iter_timer += 1
+            node.history_data['time'].append(self.iter_timer)
+            next_node = max(node.children, key=lambda x: x.ucb_score())
+            choosen_act = next_node.formula[-1]
+            node.history_data['next_node_ind'].append(self.env.action_space.index(choosen_act))
+            node.history_data['next_node_val'].append(next_node.ucb_score())
+            node = next_node
         return node
 
     def expand(self, node, action_priors):
@@ -95,11 +102,10 @@ class MCTS:
             if r:
                 self.propagate(node)
             else:
-                if not node.formula:
-                    pred_P, pred_R = np.ones([8]) / 8, np.ones([8]) / 8
-                else:
-                    pred_P, pred_R = self.model.predict(self.model.get_observation(node.formula, self.env)) # if simple model self.env.observation
-                    #print(node.formula, pred_P, pred_R)
+                #if not node.formula:
+                #    PP, RR = np.ones([8]) / 8, 0
+                #else:
+                pred_P, pred_R = self.model.predict(self.model.get_observation(node.formula, self.env, self.iter_timer)) # if simple model self.env.observation
                 self.expand(node, pred_P)
 
             r = max(0, r)
@@ -133,6 +139,8 @@ if __name__ == "__main__":
         rsmp.env = Env(inp=1, out=i+1)
         print(123)
         rand_val += list(rsmp.sampling())
+
+    print([f.formula for f in rand_val])
 
     print([(f.formula, f.immediate_reward, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
     print([(f.formula, f.fin_prob, f.ucb_score(), f.get_mean_value(), f.times_visited) for f in rand_val if

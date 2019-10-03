@@ -93,7 +93,7 @@ class Env:
             except (KeyError, TypeError, IndexError):
                 self.err = 1
 
-    def get_observation(self, formula):
+    def get_observation(self, formula, time=0):
         self.calc_formula(formula)
         net_observ = self.NN_input(formula)
         return net_observ
