@@ -141,6 +141,7 @@ if __name__ == "__main__":
         rand_val += list(rsmp.sampling())
 
     print([f.formula for f in rand_val])
+    print('T', rsmp.iter_timer)
 
     print([(f.formula, f.immediate_reward, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
     print([(f.formula, f.fin_prob, f.ucb_score(), f.get_mean_value(), f.times_visited) for f in rand_val if
