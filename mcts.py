@@ -102,9 +102,7 @@ class MCTS:
             if r:
                 self.propagate(node)
             else:
-                #if not node.formula:
-                #    PP, RR = np.ones([8]) / 8, 0
-                #else:
+
                 pred_P, pred_R = self.model.predict(self.model.get_observation(node.formula, self.env, self.iter_timer)) # if simple model self.env.observation
                 self.expand(node, pred_P)
 

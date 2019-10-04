@@ -70,7 +70,7 @@ class Trainer:
         #print(len(self.replay), index, [self.replay[i] for i in index]   )
         return [nodes_buc[i] for i in index]
 
-    def transform_bach_as_input(self, batch):
+    def transform_bach_as_input(self, batch, model):
         X = []
         real_prob = []
         real_reward = []
@@ -82,7 +82,7 @@ class Trainer:
             #self.env.calc_formula(node.parent.formula)
 
 
-            net_observ = self.env.get_observation(node.formula, node.history_data['time'][i])
+            net_observ = model.get_observation(node.formula, self.env, node.history_data['time'][i])
             X.append(net_observ)
             p_next = np.zeros(self.env.n_actions)
             p_next[node.history_data['next_node_ind'][i]] = 1
@@ -96,7 +96,7 @@ class Trainer:
                 #print('ss', X)
             else:
                 real_reward.append(node.history_data['next_node_val'][i])
-        X = np.vstack(X)
+        X = torch.cat(X, dim=1)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
         return X, real_reward, real_prob
@@ -119,7 +119,7 @@ class Trainer:
             #for x, rr, rp in zip(X, real_reward, real_prob):
                 #print(xx, rrr,rpp)
             self.optimizer.zero_grad()
-            #print(X)
+            print(X)
             p_pred, v_pred = model(Variable(Tensor(X)))
             # print('pr  ', probability, 'pp  ', p_pred)
             val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
@@ -132,81 +132,6 @@ class Trainer:
 
 
 
-class mctsTrainer(Trainer):
-    def __init__(self, env, mcts, batch_size=80):
-        Trainer.__init__(self, env=env, batch_size=batch_size)
-        self.mcts = mcts
-
-    def transform_bach_as_input(self, batch):
-        X = []
-        real_prob = []
-        real_reward = []
-        for node in batch:
-
-
-            X.append([])
-            #XX = np.zeros(self.env.n_actions, )
-            prob = np.zeros(self.env.n_actions)
-            reward = np.zeros(self.env.n_actions)
-            for i, a in enumerate(self.env.action_space):
-                if node.formula + a in self.mcts.Nodes:
-                    self.env.calc_formula(node.formula + a)
-                    net_observ = self.env.NN_input(node.formula + a)
-                    X[-1].append(net_observ)
-                    prob[i] = self.mcts.Nodes[node.formula + a].fin_prob
-                    g = self.mcts.Nodes[node.formula + a].ucb_score()
-                    # print(g, node.formula + a, node.formula, a, self.mcts.Nodes)
-                    reward[i] = g
-                #print()
-            real_prob.append(prob) # matrix size(8, 1) of next (f+a) prob
-            real_reward.append(reward)
-        #X = np.vstack(X)
-        real_prob = np.vstack(real_prob)
-        real_reward = np.vstack(real_reward)
-        return X, real_reward, real_prob
-
-
-class LSTMModel(nn.Module):
-
-    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
-        super(LSTMModel, self).__init__()
-        self.hidden_dim = hidden_dim
-        self.embedding_dim = embedding_dim
-
-        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-
-        # The LSTM takes word embeddings as inputs, and outputs hidden states
-        # with dimensionality hidden_dim.
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim)
-
-        # The linear layer that maps from hidden state space to tag space
-        self.aprob_pred = nn.Linear(hidden_dim, vocab_size)
-        self.val_pred = nn.Linear(hidden_dim, vocab_size)
-        self.result_pred = nn.Linear(hidden_dim, vocab_size)
-
-    def forward(self, sentence):
-        slen, b_sz, ind_s = sentence.shape
-        embeds = self.word_embeddings(sentence)
-        # print(embeds.shape, embeds.view(len(sentence), 1, -1))
-        lstm_out, hidden = self.lstm(embeds.view(len(sentence), 1, self.embedding_dim))
-        hidden = hidden[0].view(b_sz, self.hidden_dim)
-        aprob_pred = F.softmax(self.aprob_pred(hidden), dim=1)
-        val_pred = self.val_pred(hidden)
-        result_pred = self.result_pred(hidden)
-        return aprob_pred, val_pred, result_pred
-
-    def predict(self, x):
-        self.eval()
-        # x = Variable(torch.LongTensor(x))
-        act_prob, val, _ = self.forward(x)
-        return act_prob.data.numpy(), val.data.numpy()
-
-    def get_observation(self, formula, env):
-        #print(formula)
-        return Variable(torch.LongTensor(np.array([env.action_space.index(a) for a in formula]).reshape([-1, 1, 1])))
-
-
-#model = LSTMModel(4, 32, 8, 8)
 
 if __name__ == "__main__":
     from env_test import Env
