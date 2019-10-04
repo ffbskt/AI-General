@@ -1,217 +1,149 @@
 import numpy as np
-from env_test import Env
-from policy import Model
-from collections import defaultdict
-import heapq
-
-class dotdict(dict):
-    def __getattr__(self, name):
-        return self[name]
-
 class Node:
-    def __init__(self, formula, predP, predR, fin_reward=0):
-        self.formula = formula
-        self.predP = predP
-        self.predR = predR
-        self.fin_reward = fin_reward
-        self.N = 0
-        self.Q = 0
+    parent = None  # parent Node
+    value_sum = 0.  # sum of state values from all visits (numerator)
+    times_visited = 0
+    def __init__(self, parent=None, action=None, prob=None, env=None):
+        self.parent = parent
+        self.action = action
+        self.P = prob
+        self.history_data = {'time':[], 'next_node_ind':[], 'next_node_val':[]}
+        self.children = set()
+        if parent:
+            self.immediate_reward, self.formula = env.do_move(parent.formula, action)
+            # if self.immediate_reward > 0: print("!!-----------------------------", self.formula)
+        else:
+            self.immediate_reward, self.formula = 0.0, ''
 
-    def __lt__(self, other):
-        if self.fin_reward:
-            return False
-        if other.fin_reward:
-            return True
-        return self.predR > other.predR
+        self.fin_prob = 0
 
-class MCTS_best_leaf:
-    """
-        different algorithm. The Idea do not go down by tree choose best ucb node, except - we immediatly
-        compare:
-     1) leafs and go to best leaf even parents branch has low ucb.
-     2) compute_Q - no value 
+    def is_leaf(self):
+        return len(self.children) == 0
 
-    """
+    def get_mean_value(self):
+        return self.value_sum / self.times_visited if self.times_visited != 0 else 0
+
+    def ucb_score(self, scale=10, max_value=1e5):  # 1e100
+        """
+        Computes ucb1 upper bound using current value and visit counts for node and it's parent.
+
+        :param scale: Multiplies upper bound by that. From hoeffding inequality, assumes reward range to be [0,scale].
+        :param max_value: a value that represents infinity (for unvisited nodes)
+
+        """
+
+        U = (self.P *
+             np.sqrt(self.parent.times_visited) / (1 + self.times_visited))  # need if zero visited?
+
+        # if self.get_mean_value() > 0:
+        #    print(self.get_mean_value(), self.env.formula)
+
+        # print(self.env.formula, U, self.P, self.parent.times_visited)
+        return self.get_mean_value() + scale * U
+
+
+class MCTS:
     def __init__(self, env, model, args):
         self.env = env
-        self.args = args
-        node = Node('', 1, 0.5)
-        self.heap_best = [node,]
-        self.Nodes = {'': node}
-        #self.Ns[node.formula]
         self.model = model
-        #self.samples = []
+        self.args = args
+        node = Node()
+        self.Nodes = {'': node}
+        self.sum_reward = 0
+        self.root = Node()
+        self.iter_timer = 0
 
-    def find_best_leaf(self):
-        return heapq.heappop(self.heap_best)
 
-    def expand(self, node):
-        #print(node.fin_reward)
-        pred_P, pred_R = self.model.predict(self.env.get_observation(node.formula))
-        self.up_prev_N(node)
-        for a in range(self.env.n_actions):
-            r, next_formula = self.env.do_move(node.formula, a)
-            Q = self.compute_Q(pred_P[a], pred_R[a], next_formula)
-            new_node = Node(next_formula, pred_P[a], pred_R[a], fin_reward=r)
-            #print(next_formula, r)
-            heapq.heappush(self.heap_best, new_node) ###&&&
-            if r != 0:
-                self.Nodes[next_formula] = new_node
+    def select_best_leaf(self):
+        node = self.root
+        while not node.is_leaf():
+            self.iter_timer += 1
+            node.history_data['time'].append(self.iter_timer)
+            next_node = max(node.children, key=lambda x: x.ucb_score())
+            choosen_act = next_node.formula[-1]
+            node.history_data['next_node_ind'].append(self.env.action_space.index(choosen_act))
+            node.history_data['next_node_val'].append(next_node.ucb_score())
+            node = next_node
+        return node
 
-        return r
+    def expand(self, node, action_priors):
+        for action, prob in enumerate(action_priors):
+            next_node = Node(node, action, prob, self.env)
+            node.children.add(next_node)
+            # self.Nodes[next_node.formula] = next_node
 
-    def up_prev_N(self, node):
-        #print(self.Ns)
-        formula = node.formula
-        if formula in self.Nodes:
-            return 0
-        self.Nodes[formula] = node
-        self.Nodes[formula].N += 1
-        for i in range(len(formula)):
-            #print(formula, formula[:-i - 1], i)
-            self.Nodes[formula[:-i]].N += 1
-
-    def compute_Q(self, pred_P, pred_R, formula):
-        # print(formula, pred_R,  self.args.cpuct * pred_P * np.sqrt(self.Ns[formula[:-1]]), self.Ns[formula[:-1]], self.Ns, formula[:-1])
-        return pred_R + self.args.cpuct * pred_P * np.sqrt(self.Nodes[formula[:-1]].N)
+    def propagate(self, node, fogot=0.9):
+        #print(1, node.formula,node.immediate_reward, node.value_sum)
+        #if node.formula[0] == 'i' and len(node.formula)==2: print(node.parent.value_sum, node.parent.times_visited)
+        node.value_sum += node.immediate_reward
+        R = node.immediate_reward
+        node.times_visited += 1
+        while node.parent:
+            #if node.formula[0] == 'i' and len(node.formula) == 2: print(node.parent.value_sum,
+            #                                                            node.parent.times_visited)
+            #child_val = node.value_sum
+            node = node.parent
+            node.value_sum += R #child_val
+            R *= fogot
+            node.times_visited += 1
 
     def sampling(self):
         i, r = 0, 0
-        while (args.iters > i and not r) or 2 * args.iters > i:
-            node = m.find_best_leaf()
-            r = max(m.expand(node), r)
+        while (self.args.iters > i and not r) or 2 * self.args.iters > i:
+            node = self.select_best_leaf()
+            #if node.parent is not None: print(node.formula, node.immediate_reward)
+            r = node.immediate_reward
+            #if r: print(node.formula)
+            self.Nodes[node.formula] = node
+            if r:
+                self.propagate(node)
+            else:
+
+                pred_P, pred_R = self.model.predict(self.model.get_observation(node.formula, self.env, self.iter_timer)) # if simple model self.env.observation
+                self.expand(node, pred_P)
+
+            r = max(0, r)
             i += 1
 
-        # TODO add_real_reward(self.Nodes)
-        self.add_real_reward()
+        self.compute_p_real()
+        return  self.Nodes.values()
 
-        return self.Nodes.values()
-
-
-    def add_real_reward(self):
-        sorted_formulas = sorted(list(m.Nodes), key=lambda x: (m.Nodes[x].fin_reward, len(x)))
-        positive_ind = 1
-        for i, f in enumerate(sorted_formulas):
-            if self.Nodes[f].fin_reward > 0:
-                positive_ind = i
-            self.Nodes[f].fin_reward *= np.sqrt(positive_ind/(1 + i))
-
-
-
+    def compute_p_real(self):
+        for f in self.Nodes:
+            if not self.Nodes[f[:-1]].times_visited: print(self.Nodes[f[:-1]].formula,
+                                                           self.Nodes[f].formula, self.Nodes[f].times_visited)
+            if self.Nodes[f].times_visited:
+                self.Nodes[f].fin_prob = self.Nodes[f].times_visited / self.Nodes[f[:-1]].times_visited
 
 if __name__ == "__main__":
-    model = Model()
+    # from pipeline import dotdict
+    class dotdict(dict):
+        def __getattr__(self, name):
+            return self[name]
+
+    import models
+    from env_test import Env
+
+    model = models.Model()
+    args = dotdict({'cpuct': 1, 'iters': 1000})
     env = Env(inp=1, out=1)
+    rsmp = MCTS(env, model, args)
+    rand_val = []
+    for i in range(1):
+        rsmp.env = Env(inp=1, out=i+1)
+        print(123)
+        rand_val += list(rsmp.sampling())
+
+    #print([f.formula for f in rand_val])
+    print('T', rsmp.iter_timer, 'ss')
+
+    #print([(f.formula, f.history_data, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
+    print([(f.formula, f.fin_prob, f.ucb_score(), f.get_mean_value(), f.times_visited) for f in rand_val if
+           f.formula[:1] == 'i' and len(f.formula) < 3])
+    print(rsmp.Nodes[''].times_visited)
+
+    import matplotlib.pyplot as plt
+    #plt.plot([f.ucb_score() for f in rand_val if f.formula != ''])
+    plt.plot(rsmp.Nodes['ie'].history_data['time'])
+    plt.show()
 
-    args = dotdict({'cpuct':2, 'iters':22})
-    m = MCTS_best_leaf(env, model, args)
-
-
-
-
-
-    #m.add_real_reward()
-    #print(list(m.Nodes))
-    #print(sorted(list(m.Nodes), key=lambda x: (m.Nodes[x].fin_reward, len(x))))
-    #print([(k, len(k), n.fin_reward) for k, n in m.Nodes.items()])
-    # TODO net_train
-    #for n in m.sampling().items():
-    #    print(n)
-    from policy import NN_input
-
-    def prepare_input(env, inp, out, formula):
-        #env.formula = formula
-        env.inp, env.out = inp, out
-        env.calc_formula(formula)
-        values, err = env.result, env.err
-        net_observ = NN_input(inp, out, formula, values, err)
-        return net_observ
-
-
-    def get_batch(nodes_buc, batch_size=10):
-        n = len(nodes_buc)
-        index = [
-            np.random.randint(0, n - 1)
-            for _ in range(batch_size)
-        ]
-        #print(len(self.replay), index, [self.replay[i] for i in index]   )
-        return [nodes_buc[i] for i in index]
-
-
-
-
-
-    def train_model(nodes_buc):
-        for i in range(20):
-            batch = get_batch(nodes_buc, batch_size=10)
-            # print(batch)
-            X = np.vstack([prepare_input(env, env.inp, env.out, node.formula)
-                           for node in batch])
-            reward = np.vstack([np.array([node.fin_reward]) for node in batch])
-            probability = np.vstack([np.array([node.predP]) for node in batch])
-            print('s2', model)
-            model.training(X, reward, probability)
-            print('s', model)
-
-
-    val = list(m.sampling())
-
-    train_model(val)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#    import matplotlib.pyplot as plt
-    #print(policy_net.loss_backet)    
-#    plt.plot(policy_net.loss_backet)
-#    plt.show()
-    
-
-
-# while root.children:
-    #print(root.children.pop().children.pop().env.formula)
-#    root = root.select_best_leaf()
-#    print('ff', root.env.formula)

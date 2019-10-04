@@ -115,7 +115,7 @@ class Model(nn.Module):
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        act_prob = F.softmax(self.action_prob_out(x), dim=0)
+        act_prob = F.softmax(self.action_prob_out(x), dim=-1)
         val = F.tanh(self.val(x))
         #val_sum = self.val_sum_out(val)
 
@@ -126,11 +126,13 @@ class Model(nn.Module):
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
 
-    def training(self, X, reward, probability):
+    def training_(self, X, reward, probability):
         self.optimizer.zero_grad()
-        p_pred, v_pred = self.model(Variable(Tensor(X)))
-        val_loss = torch.min(torch.mean(Variable(Tensor(reward)) - v_pred ** 2), Variable(Tensor([10])))
+        p_pred, v_pred = self(Variable(Tensor(X)))
+        #print('pr  ', probability, 'pp  ', p_pred)
+        val_loss = torch.mean((Variable(Tensor(reward)) - v_pred) ** 2)#, Variable(Tensor([10]))
         loss = val_loss - torch.mean(Variable(Tensor(probability)) * torch.log(p_pred))
+        #loss = -torch.mean(Variable(Tensor(probability)) * torch.log(p_pred))
         loss.backward()
         self.optimizer.step()
         self.loss_backet.append(loss.data.numpy())

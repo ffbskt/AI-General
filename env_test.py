@@ -80,8 +80,9 @@ class Env:
         self.result['i'] = self.inp
         for ind, comand in enumerate(formula):
             try:
-
+                if ind < 1: continue
                 if comand == 'e' and formula[ind + 1] in self.result:
+                    #print(self.result[formula[ind - 1]], formula[ind - 1])
                     self.result[formula[ind + 1]] = self.result[formula[ind - 1]]
                 if comand == 's' and formula[ind + 1] in self.result:
                     self.result[formula[ind + 1]] += self.result[formula[ind - 1]]
@@ -92,12 +93,12 @@ class Env:
             except (KeyError, TypeError, IndexError):
                 self.err = 1
 
-    def get_observation(self, formula):
+    def get_observation(self, formula, time=0):
         self.calc_formula(formula)
         net_observ = self.NN_input(formula)
         return net_observ
 
-    def one_hot_last(self, formula, n_last=4):
+    def one_hot_last(self, formula, n_last=1):
         act_sp = self.action_space
         matrix = np.zeros([n_last * len(act_sp)])
         for i, f in enumerate(formula[-n_last:]):
@@ -105,7 +106,7 @@ class Env:
             matrix[act_sp.index(f) + (k + i) * 8] = 1
         return matrix
 
-    def NN_input(self, formula):
+    def NN_input(self, formula, time=0):
         # values, err = calc_formula(formula, inp, env.result)
         values_norm = np.array(list(self.result.values()))
         inp, out, err = self.inp, self.out, self.err
@@ -116,19 +117,21 @@ class Env:
         out = out / s
         if values_norm.shape[0] != 6:
             print('ERROR', self.result, values_norm.shape, self.one_hot_last(formula).shape)
-        head = np.hstack([np.array([inp, out, err]), values_norm, self.one_hot_last(formula)])
+        time = np.sin(time/100)
+        head = np.hstack([np.array([inp, out, err, time]), values_norm, self.one_hot_last(formula)])
         return head
 
 
 if __name__ == "__main__":
-    fstr = 'ieo'
-    fstr = 'ieo'  # '1eAAsAAsAisAAeo'
+    fstr = 'eBCAi'
+    #fstr = 'ieo'  # '1eAAsAAsAisAAeo'
     # print(emb_formula(fstr, formula_dict))
     # print(emb_command(fstr, 3, command_dict).values())
     # print(Env.calc_formula())
 
-    e = Env(fstr)
-    e.do_move(6)
-    print(e.game_end(), e.formula)
-    print(e.get_observation())
-    print(e.env_reset_new(), e.env_reset_new().result)
+    e = Env(1,1)
+    #e.do_move(fstr, 6)
+    e.calc_formula(fstr)
+    print(e.result)
+    #print(e.get_observation())
+    #print(e.env_reset_new(), e.env_reset_new().result)
