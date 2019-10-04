@@ -149,7 +149,9 @@ if __name__ == "__main__":
                            for node in batch])
             reward = np.vstack([np.array([node.fin_reward]) for node in batch])
             probability = np.vstack([np.array([node.predP]) for node in batch])
+            print('s2', model)
             model.training(X, reward, probability)
+            print('s', model)
 
 
     val = list(m.sampling())
