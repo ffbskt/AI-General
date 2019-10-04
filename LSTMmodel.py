@@ -12,14 +12,14 @@ class mctsTrainer(Trainer):
         Trainer.__init__(self, env=env, batch_size=batch_size)
         self.mcts = mcts
 
-    def get_sorted_batch(self, val, batch_size=20):
+    def get_sorted_batch(self, val, batch_size=0):
         sort_val = sorted(val, key=lambda x: len(x.formula))
-        #batch_size = batch_size or self.batch_size
+        batch_size = batch_size or self.batch_size
         i = np.random.randint(len(val) - batch_size)
         return sort_val[i:i + batch_size]
 
     def get_batch(self, nodes_buc, batch_size=0):
-        return self.get_sorted_batch(nodes_buc, batch_size)
+        return self.get_sorted_batch(nodes_buc, batch_size or self.batch_size)
 
     # def transform_bach_as_input(self, batch):
     #     X = []
@@ -49,7 +49,7 @@ class mctsTrainer(Trainer):
     #     real_reward = np.vstack(real_reward)
     #     return X, real_reward, real_prob
 
-    def train_model(self, nodes_buc, model, batch_size=10, net_iters=200):
+    def train_model(self, nodes_buc, model, batch_size=0, net_iters=200):
         self.optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.3, weight_decay=0.1)
 
         for i in range(net_iters):
@@ -57,6 +57,7 @@ class mctsTrainer(Trainer):
             # print(batch)
 
             X, real_reward, real_prob = self.transform_bach_as_input(batch, model)
+            X = X.view(-1, self.batch_size)
 
 
             #print(i, real_prob.shape)
@@ -97,7 +98,7 @@ class LSTMModel(nn.Module):
         self.result_pred = nn.Linear(hidden_dim, self.vocab_size - 1)
 
     def forward(self, sentence):
-        slen, b_sz, ind_s = sentence.shape
+        slen, b_sz = sentence.shape
         embeds = self.word_embeddings(sentence.view(slen, b_sz))
         #print(embeds.shape, embeds.view(len(sentence), 1, -1))
         lstm_out, hidden = self.lstm(embeds)#.view(len(sentence), 1, self.embedding_dim))
@@ -105,7 +106,7 @@ class LSTMModel(nn.Module):
         aprob_pred = F.softmax(self.aprob_pred(hidden), dim=1)
         val_pred = self.val_pred(hidden)
         result_pred = self.result_pred(hidden)
-        #print(234)
+        #print(234, embeds.shape, sentence.shape)
         return aprob_pred, val_pred, result_pred
 
     def predict(self, x):
@@ -116,12 +117,12 @@ class LSTMModel(nn.Module):
 
     def get_observation(self, formula, env, time=0):
         #print(formula)
-        seq = np.zeros(self.MAXL).reshape(-1, 1, 1) + 8
+        seq = np.zeros(self.MAXL).reshape(-1, 1) + 8
         if not formula:
-            formula_index = np.array([8]).reshape([-1, 1, 1])
+            formula_index = np.array([8]).reshape([-1, 1])
         else:
             formula_index = np.array([env.action_space.index(a) for a in formula])
-        seq[:formula_index.shape[0], 0, 0] = formula_index
+        seq[:formula_index.shape[0], 0] = formula_index
         #print(seq.shape)
         return Variable(torch.LongTensor(seq))
 
@@ -145,13 +146,14 @@ if __name__ == "__main__":
     print(len(val))
 
 
-    t = mctsTrainer(env, mcts, batch_size=50)
+    t = mctsTrainer(env, mcts, batch_size=10)
 
     #t = Trainer(env, batch_size=20)
-    for i in range(10):
+    for i in range(3):
         print(i, t.loss_backet[-3:])
         mcts = MCTS(env, model, args)
         val = list(mcts.sampling())
+        print(len(val), val[-1].history_data['time'], val[-1].formula) 
         val = t.clean_unpredict_node(val)
         #print('aa', val)
         t.train_model(val, model, net_iters=300)
