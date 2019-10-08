@@ -1,8 +1,4 @@
 import numpy as np
-
-
-
-
 class Node:
     parent = None  # parent Node
     value_sum = 0.  # sum of state values from all visits (numerator)
@@ -15,7 +11,7 @@ class Node:
         self.children = set()
         if parent:
             self.immediate_reward, self.formula = env.do_move(parent.formula, action)
-            # if self.immediate_reward > 0: print("!!-----------------------------", self.formula)
+            #if self.immediate_reward > 0: print("!!-----------------------------", self.formula)
         else:
             self.immediate_reward, self.formula = 0.0, ''
 
@@ -97,7 +93,7 @@ class MCTS:
             node = self.select_best_leaf()
             #if node.parent is not None: print(node.formula, node.immediate_reward)
             r = node.immediate_reward
-            #if r: print(node.formula)
+            #if r: print('R', node.formula)
             self.Nodes[node.formula] = node
             if r:
                 self.propagate(node)
@@ -135,13 +131,13 @@ if __name__ == "__main__":
     rand_val = []
     for i in range(1):
         rsmp.env = Env(inp=1, out=i+1)
-        print(123)
+        print('out ', i+1)
         rand_val += list(rsmp.sampling())
 
     #print([f.formula for f in rand_val])
     print('T', rsmp.iter_timer, 'ss')
 
-    #print([(f.formula, f.history_data, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<4])
+    print([(f.formula, f.ucb_score(), f.times_visited) for f in rand_val if f.formula[:2]=='ie' and len(f.formula)<14])
     print([(f.formula, f.fin_prob, f.ucb_score(), f.get_mean_value(), f.times_visited) for f in rand_val if
            f.formula[:1] == 'i' and len(f.formula) < 3])
     print(rsmp.Nodes[''].times_visited)

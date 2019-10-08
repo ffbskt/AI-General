@@ -36,7 +36,7 @@ class Model(nn.Module):
 
     def predict(self, x):
         self.eval()
-        x = Variable(Tensor(x))
+        #x = Variable(Tensor(x))
         act_prob, val = self.forward(x)
         return act_prob.data.numpy(), val.data.numpy()
     
@@ -83,7 +83,7 @@ class Trainer:
 
 
             net_observ = model.get_observation(node.formula, self.env, node.history_data['time'][i])
-            X.append(net_observ)
+            X.append(net_observ.view([1,-1]))
             p_next = np.zeros(self.env.n_actions)
             p_next[node.history_data['next_node_ind'][i]] = 1
             real_prob.append(p_next) # matrix size(8, 1) of next (f+a) prob
@@ -96,7 +96,9 @@ class Trainer:
                 #print('ss', X)
             else:
                 real_reward.append(node.history_data['next_node_val'][i])
-        X = torch.cat(X, dim=1)
+        #print(X)
+        X = torch.cat(X, dim=0)
+        #print(X.shape)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
         return X, real_reward, real_prob
@@ -111,7 +113,7 @@ class Trainer:
             batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
             # print(batch)
 
-            X, real_reward, real_prob = self.transform_bach_as_input(batch)
+            X, real_reward, real_prob = self.transform_bach_as_input(batch, model)
 
 
             #print(i, real_prob.shape)
@@ -119,8 +121,8 @@ class Trainer:
             #for x, rr, rp in zip(X, real_reward, real_prob):
                 #print(xx, rrr,rpp)
             self.optimizer.zero_grad()
-            print(X)
-            p_pred, v_pred = model(Variable(Tensor(X)))
+            #print(X)
+            p_pred, v_pred = model(X)
             # print('pr  ', probability, 'pp  ', p_pred)
             val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
             #loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
