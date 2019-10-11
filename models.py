@@ -77,6 +77,8 @@ class Trainer:
         #print(batch)
 
         for node in batch:
+            #if not len(node.history_data['time']):
+                
             i = np.random.randint(0, len(node.history_data['time']))
             #if node.parent:
             #self.env.calc_formula(node.parent.formula)
