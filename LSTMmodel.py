@@ -56,7 +56,7 @@ class mctsTrainer(Trainer):
             batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
             # print(batch)
 
-            X, real_reward, real_prob = self.transform_bach_as_input(batch, model)
+            X, real_reward, real_prob, cresult = self.transform_bach_as_input(batch, model)
             X = X.view(-1, self.batch_size)
 
 
@@ -68,9 +68,11 @@ class mctsTrainer(Trainer):
             #print(123, X.shape)#model(Variable(Tensor(X))))
             p_pred, v_pred, result_pred = model(X)
             # print('pr  ', probability, 'pp  ', p_pred)
+            #print(cresult)
             val_loss = torch.mean((Variable(Tensor(real_reward)) - v_pred) ** 2)  # , Variable(Tensor([10]))
-            #loss = val_loss - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
-            loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
+            result_loss = torch.mean(torch.sum((Variable(Tensor(cresult))/8 - result_pred/8) ** 2))
+            loss = val_loss #- torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))# + result_loss 
+            #loss = - torch.mean(Variable(Tensor(real_prob)) * torch.log(p_pred))
             #print(loss, rpp, p_pred)
             loss.backward()
             self.optimizer.step()
@@ -95,10 +97,11 @@ class LSTMModel(nn.Module):
         # The linear layer that maps from hidden state space to tag space
         self.aprob_pred = nn.Linear(hidden_dim, self.vocab_size-1)
         self.val_pred = nn.Linear(hidden_dim, 1)
-        self.result_pred = nn.Linear(hidden_dim, self.vocab_size - 1)
+        self.result_pred = nn.Linear(hidden_dim, self.vocab_size - 3)
 
     def forward(self, sentence):
         slen, b_sz = sentence.shape
+        #print(b_sz)
         embeds = self.word_embeddings(sentence.view(slen, b_sz))
         #print(embeds.shape, embeds.view(len(sentence), 1, -1))
         lstm_out, hidden = self.lstm(embeds)#.view(len(sentence), 1, self.embedding_dim))
@@ -106,7 +109,7 @@ class LSTMModel(nn.Module):
         aprob_pred = F.softmax(self.aprob_pred(hidden), dim=1)
         val_pred = self.val_pred(hidden)
         result_pred = self.result_pred(hidden)
-        #print(234, embeds.shape, sentence.shape)
+        #print(234, embeds.shape, sentence.shape, hidden.shape, b_sz)
         return aprob_pred, val_pred, result_pred
 
     def predict(self, x):

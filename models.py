@@ -74,6 +74,7 @@ class Trainer:
         X = []
         real_prob = []
         real_reward = []
+        cur_result = []
         #print(batch)
 
         for node in batch:
@@ -89,6 +90,9 @@ class Trainer:
             p_next = np.zeros(self.env.n_actions)
             p_next[node.history_data['next_node_ind'][i]] = 1
             real_prob.append(p_next) # matrix size(8, 1) of next (f+a) prob
+            
+            self.env.calc_formula(node.formula)
+            cur_result.append(list(self.env.result.values()))
 
             # real value from past
             if node.parent:
@@ -103,7 +107,8 @@ class Trainer:
         #print(X.shape)
         real_prob = np.vstack(real_prob)
         real_reward = np.vstack(real_reward)
-        return X, real_reward, real_prob
+        cur_result = np.vstack(cur_result)
+        return X, real_reward, real_prob, cur_result
 
 
 
@@ -115,7 +120,7 @@ class Trainer:
             batch = self.get_batch(nodes_buc, batch_size=batch_size or self.batch_size)
             # print(batch)
 
-            X, real_reward, real_prob = self.transform_bach_as_input(batch, model)
+            X, real_reward, real_prob, cr = self.transform_bach_as_input(batch, model)
 
 
             #print(i, real_prob.shape)

@@ -70,6 +70,7 @@ class MCTS:
         for action, prob in enumerate(action_priors):
             next_node = Node(node, action, prob, self.env)
             node.children.add(next_node)
+            self.sum_reward += max(0, next_node.immediate_reward)
             # self.Nodes[next_node.formula] = next_node
 
     def propagate(self, node, fogot=0.9):
