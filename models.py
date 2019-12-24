@@ -11,7 +11,7 @@ class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
         self.cnv1 = nn.Conv1d(1,6,8)
-        self.fc1 = nn.Linear(18, 182)
+        self.fc1 = nn.Linear(42, 182)
         self.fc2 = nn.Linear(182, 40)
         self.action_prob_out = nn.Linear(40, 8)
         #self.val0 = nn.Linear(40, 80)
@@ -27,9 +27,9 @@ class Model(nn.Module):
         # print(x.shape)
         #x = torch.flatten(x, start_dim=1)
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = self.fc2(x)
         act_prob = F.softmax(self.action_prob_out(x), dim=-1)
-        val = F.tanh(self.val(x))
+        val = self.val(x)
         #val_sum = self.val_sum_out(val)
 
         return act_prob, val
@@ -80,16 +80,16 @@ class Trainer:
         for node in batch:
             #if not len(node.history_data['time']):
                 
-            i = np.random.randint(0, len(node.history_data['time']))
+            i = len(node.history_data['time']) -1 #np.random.randint(0, len(node.history_data['time']))
             #if node.parent:
             #self.env.calc_formula(node.parent.formula)
 
 
             net_observ = model.get_observation(node.formula, self.env, node.history_data['time'][i])
             X.append(net_observ.view([1,-1]))
-            p_next = np.zeros(self.env.n_actions)
-            p_next[node.history_data['next_node_ind'][i]] = 1
-            real_prob.append(p_next) # matrix size(8, 1) of next (f+a) prob
+            ##p_next = np.zeros(self.env.n_actions)
+            ##p_next[node.history_data['next_node_ind'][i]] = 1
+            real_prob.append(node.fin_prob) # matrix size(8, 1) of next (f+a) prob
             
             self.env.calc_formula(node.formula)
             cur_result.append(list(self.env.result.values()))

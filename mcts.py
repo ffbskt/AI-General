@@ -56,13 +56,13 @@ class MCTS:
 
     def select_best_leaf(self):
         node = self.root
-        while not node.is_leaf():
+        while not node.is_leaf(): #and not self.env.game_end(node.formula):
             self.iter_timer += 1
             node.history_data['time'].append(self.iter_timer)
             next_node = max(node.children, key=lambda x: x.ucb_score())
             choosen_act = next_node.formula[-1]
             node.history_data['next_node_ind'].append(self.env.action_space.index(choosen_act))
-            node.history_data['next_node_val'].append(next_node.ucb_score())
+            node.history_data['next_node_val'].append(next_node.immediate_reward)
             node = next_node
         return node
 
