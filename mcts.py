@@ -6,7 +6,8 @@ class Node:
     def __init__(self, parent=None, action=None, prob=None, env=None):
         self.parent = parent
         self.action = action
-        self.P = prob
+        self.P = prob        # if both prob needed ??
+        self.fin_prob = 0
         self.history_data = {'time':[], 'next_node_ind':[], 'next_node_val':[]}
         self.children = set()
         if parent:
@@ -15,7 +16,7 @@ class Node:
         else:
             self.immediate_reward, self.formula = 0.0, ''
 
-        self.fin_prob = 0
+
 
     def is_leaf(self):
         return len(self.children) == 0
@@ -31,6 +32,9 @@ class Node:
         :param max_value: a value that represents infinity (for unvisited nodes)
 
         """
+        if self.times_visited == 0:
+            return max_value
+
 
         U = (self.P *
              np.sqrt(self.parent.times_visited) / (1 + self.times_visited))  # need if zero visited?
