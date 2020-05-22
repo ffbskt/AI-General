@@ -28,12 +28,21 @@ class RMetaAgent(BaseAgent):
     return np.random.randint(0, 2, size=self.goal_shape)
 
 class DDPGAgent(BaseAgent):
-    def __init__(self, env, ReplayBuffer, net, start_steps=200, update_every=100, iters=None, update_after=1000,
+    class ActionSpace:
+        def __init__(self, shape):
+            self.shape = [shape]
+            self.high = np.ones(shape)
+
+    def __init__(self, env, ReplayBuffer, net, act_shape=None, start_steps=200, update_every=100, iters=None, update_after=1000,
                  repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
                  seed=0, act_noise=0.1):
         super(DDPGAgent, self).__init__(env)
-        self.act_noise = act_noise
         self.action_sp = self.env.action_space
+        if act_shape:
+            self.action_sp = self.ActionSpace(act_shape[-1])
+        self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed]
+        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed)
+        self.act_noise = act_noise
         self.act_dim = env.action_space.shape[0]
         self.act_limit = env.action_space.high[0]
         self.buffer = ReplayBuffer(self.obs_dim, self.act_dim, size=repl_size)
@@ -41,9 +50,7 @@ class DDPGAgent(BaseAgent):
         self.update_every = update_every
         self.update_after = update_after
         self.iters = iters or update_every
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp)
+        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed)
 
         # Train
         self.batch_size = batch_size
@@ -53,7 +60,16 @@ class DDPGAgent(BaseAgent):
         self.log = MiniLog(100)
         self.t = 0
 
-    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp):
+    def reset_agent(self, seed=0):
+        self.net_args[-1] = seed or self.net_args[1]
+        self._init_net(*self.net_args)
+        self.t = 0
+        self.buffer.ptr, self.buffer.size = 0, 0
+
+
+    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp, seed):
+        torch.manual_seed(seed)
+        np.random.seed(int(seed))
         self.ac = net(obs_sp, act_sp)
         # Create actor-critic module and target networks
         self.ac_targ = deepcopy(self.ac)
@@ -161,67 +177,68 @@ class DDPGAgent(BaseAgent):
             batch = self.buffer.sample_batch(self.batch_size)
             self.__update(data=batch)
 
-class MetaAgent(DDPGAgent):
-    class ActionSpace:
-        def __init__(self, shape):
-            self.shape = [shape]
-            self.high = np.ones(shape)
 
-    def __init__(self, env, ReplayBuffer, net, act_shape,  delay=80, start_steps=200, update_every=100, iters=None, update_after=0,
-                 repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995, seed=0):
+class HIRO(BaseAgent):
+    def __init__(self, env, replay_buf, net, store_delay=200, train_delay=100, step_each=4, ado=None):
         """
 
         :param env:
-        :param ReplayBuffer:
-        :param net:
-        :param act_shape: shape of action because it's not env action
-        :param delay: wait delay steps till lower agent study, then put obs to buffer after each learn
-        :param start_steps: wait before start update - till enough example
-        :param update_every: learn agent each update_every steps
-        :param iters:
-        :param update_after:
-        :param repl_size:
-        :param pi_lr:
-        :param q_lr:
-        :param batch_size:
-        :param gamma:
-        :param polyak:
+        :param store_delay: store after low agent update a little
+        :param train_delay: train after store train_delay observations
+        :param step_each:
+        :param ado: shapes of achive_goal, desire_goal, obs
         """
+        self.store_delay = store_delay
+        self.train_delay = train_delay
+        self.step_each = step_each
+        self.done = False
+        self.h_reward = 0
+        self.t_meta_train = 0
+        self.ado = ado or env.action_space.shape * 3 # TODO only for bitflipping
+        self.low_agent = DDPGAgent(env, replay_buf, net=net, start_steps=2000, update_every=50,
+              repl_size=10000)
+        self.high_agent = DDPGAgent(env, replay_buf, net=net, start_steps=2000, update_every=50,
+              repl_size=10000)
 
-        super(MetaAgent, self).__init__(env, ReplayBuffer, net, start_steps=200, update_every=100, iters=None, update_after=1000,
-                 repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995, seed=0)
-        obs_dim = env.observation_space.shape[0]
-        # act_dim=envf.action_space.shape[0]
-        self.act_shape = act_shape
-        self.action_space = self.ActionSpace(act_shape[-1])
-        #print(self.act)
-        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp)
-        self.delay = delay
-        self.t_delay = 0
+    def reset_agent(self, seed=0):
+        self.low_agent.reset_agent(seed)
+        self.high_agent.reset_agent(seed)
+
+    def get_action(self, o, noise_scale=None):
+        # noise_scale=0 for test
+        if self.done or self.low_agent.buffer.ptr % self.step_each == 0:
+            self.low_goal = self.high_agent.ac.act(torch.as_tensor(o, dtype=torch.float32))
+        o[self.ado[0]:self.ado[0] + self.ado[1]] = self.low_goal
+        return self.low_agent.ac.act(torch.as_tensor(o, dtype=torch.float32))
 
 
 
     def store(self, obs, act, rew, next_obs, done):
-        self.t += 1
-        self.t_delay += 1
-        self.log.rput(rew, done)
-        if self.t_delay > self.delay:
-            # print('store', self.buffer.ptr, self.delay, self.t)
-            self.buffer.store(obs, act, rew, next_obs, done)
-            if (self.t > self.update_after) and (not self.buffer.ptr % self.update_every):
-                #print('train', self.buffer.ptr, end='-')
-                self.train()
-                self.t_delay = 0
+        # low agent store
+        low_obs = obs[:]
+        low_obs[self.ado[0]: self.ado[0] + self.ado[1]] = self.low_goal
+        next_low_obs = next_obs[:]
+        next_low_obs[self.ado[0]: self.ado[0] + self.ado[1]] = self.low_goal
+        low_agent_reward = self.reward_function(low_obs, next_low_obs, self.ado)
+        self.low_agent.store(low_obs, act, low_agent_reward, next_low_obs, done)
 
-    def policy_correction(self, low_agent, low_buffer):
-        for ptr in range(self.buffer.ptr):
-            start = self.buffer.obs_buf[ptr]
-            goal = self.buffer.act_buf[ptr]
-            finish = self.buffer.obs2_buf[ptr]
-            # for act in # from start to finish in low_buffer
-            #  argmin (a - low_agent.act( # start with goal[1,2,3,4,5,...10] till finish with this goal
+        # high agent store
+        self.done = done
+        self.h_reward += rew
+        if self.t_meta_train == self.store_delay:
+            self.high_agent.update_after = self.low_agent.buffer.ptr + self.train_delay
+        if self.t_meta_train > self.store_delay:
+            self.high_agent.store(obs, self.low_goal, self.h_reward, next_obs, done)  # act == self.low_goal
+            self.h_reward = 0
+            self.t_meta_train = 0
 
 
+
+    def reward_function(self, obs, next_obs, ado):
+        goal = obs[ado[0]:ado[0] + ado[1]]
+        o = obs[ado[1]:ado[1] + ado[2]]
+        o_next = next_obs[ado[1]:ado[1] + ado[2]]
+        return -np.linalg.norm(o + goal - o_next)
 
 
 if __name__ == '__main__':
@@ -237,10 +254,10 @@ if __name__ == '__main__':
     print(env, envf.observation_space.shape[0]/3)
     a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=200, update_every=100,
                      repl_size=10000)
+    hiro = HIRO(envf, ReplayBuffer)
 
-    ma = MetaAgent(envf, ReplayBuffer, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0]//3])
     obs = envf.reset()
 
     e = a.get_action(obs)
-    print(ma.get_action(obs))
+    print(a.get_action(obs), hiro.get_action(obs))
 

@@ -3,7 +3,8 @@ from replay_buffers import ReplayBuffer, TransisionWrapper
 from nets import MLPActorCritic
 from games import BitFlipping2, Env_add_Meta
 from utils import MiniLog
-from agents import DDPGAgent, MetaAgent
+from agents import DDPGAgent, HIRO
+
 
 size=4
 env = BitFlipping2(size, 1, False)
@@ -13,22 +14,27 @@ a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=2000, update_e
 a.buffer = TransisionWrapper(ado=[size,] * 3,obs_dim=envf.observation_space.shape[0], act_dim=envf.action_space.shape[0], size=10000)
 
 
-ma = MetaAgent(envf, ReplayBuffer, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0] // 3],
-               delay=0, start_steps=2000, update_every=50)
+hiro = HIRO(envf, ReplayBuffer, net=MLPActorCritic)#, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0] // 3],
+#               start_steps=200, update_every=50)
+hiro.low_agent.buffer = TransisionWrapper(ado=[size,] * 3,obs_dim=envf.observation_space.shape[0], act_dim=envf.action_space.shape[0], size=10000)
+#envm = Env_add_Meta(envf, [size] * 3, meta_agent=ma, goal_freq=2)
 
-envm = Env_add_Meta(envf, [size] * 3, meta_agent=ma, goal_freq=2)
 
-
-def expirement(steps, agent, env):
+def expirement(steps, agent, env, seed=[0, 3], agent_name='agent'):
      o = env.reset()
-     for i in range(steps):
-          act = agent.get_action(o)
-          o2, r, d, _ = env.step(act)
-
-          agent.store(o, act, r, o2, d)
-          o = o2
-          if d:
-              o = env.reset()
+     log = MiniLog(100)
+     for s in seed:
+         agent.reset_agent(s)
+         for i in range(steps):
+              act = agent.get_action(o)
+              o2, r, d, _ = env.step(act)
+              log.rput(r, d)
+              agent.store(o, act, r, o2, d)
+              o = o2
+              if d:
+                  o = env.reset()
+         log.pd_append(name=agent_name)
+     return log
 
 
 def test_agent(agent, size, rad):
@@ -43,10 +49,12 @@ def test_agent(agent, size, rad):
             log.rput(r, d) # TODO bad test for env with unlimit steps
 
 
-expirement(10000, a, envm)
+log = expirement(20000, hiro, envf)
 #expirement(10000, a, envf)
-a.log.rplot()
-ma.log.rplot()
+print(log.pd_data.to_csv('data_log/hiro0_plus_her.csv'))
+log.rplot()
 
-ma.log.lplot()
-envm.log.rplot()
+#ma.log.rplot()
+
+#ma.log.lplot()
+

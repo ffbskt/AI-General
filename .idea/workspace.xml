@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fe53b34f-afc0-4771-a4ed-cb884fa93e00" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/v2/Enviroment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/v2/MCTS.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/AI-General.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AI-General.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mcts.py" beforeDir="false" afterPath="$PROJECT_DIR$/mcts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ddpg_meta/agents.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/agents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ddpg_meta/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ddpg_meta/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,7 +21,7 @@
         <counts>
           <entry key="project.closed" value="22" />
           <entry key="project.open.time.0" value="2" />
-          <entry key="project.open.time.1" value="1" />
+          <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.18" value="2" />
           <entry key="project.open.time.19" value="4" />
@@ -32,32 +34,32 @@
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.55" value="1" />
           <entry key="project.open.time.59" value="1" />
-          <entry key="project.opened" value="26" />
+          <entry key="project.opened" value="27" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="ipynb" value="1" />
-          <entry key="py" value="12" />
+          <entry key="py" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="IPNB" value="1" />
-          <entry key="Python" value="12" />
+          <entry key="Python" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="9" />
-          <entry key="py" value="13929" />
+          <entry key="py" value="15472" />
           <entry key="txt" value="1056" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1065" />
-          <entry key="Python" value="13929" />
+          <entry key="Python" value="15472" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -69,58 +71,63 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/env_test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1680">
-              <caret line="113" column="38" selection-start-line="113" selection-start-column="38" selection-end-line="113" selection-end-column="38" />
-              <folding>
-                <element signature="e#0#35#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/v2/Enviroment.py">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/agents.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="527">
-              <caret line="43" column="53" selection-start-line="43" selection-start-column="53" selection-end-line="43" selection-end-column="53" />
-              <folding>
-                <marker date="1577185415851" expanded="true" signature="10:11" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/v2/MCTS.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="600">
-              <caret line="40" column="20" selection-start-line="40" selection-start-column="20" selection-end-line="40" selection-end-column="20" />
-              <folding>
-                <marker date="1577633911568" expanded="true" signature="3716:4022" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mcts.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1050">
-              <caret line="70" column="19" selection-start-line="60" selection-start-column="4" selection-end-line="70" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="615">
-              <caret line="46" selection-start-line="46" selection-end-line="46" />
+            <state relative-caret-position="247">
+              <caret line="195" column="29" lean-forward="true" selection-start-line="195" selection-start-column="29" selection-end-line="195" selection-end-column="29" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
+                <marker date="1590171502456" expanded="true" signature="2292:2459" ph="..." />
+                <marker date="1590171502456" expanded="true" signature="6373:8917" ph="..." />
+                <marker date="1590171502456" expanded="true" signature="7311:7400" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/replay_buffers.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="20" selection-start-line="20" selection-end-line="20" />
+              <folding>
+                <element signature="e#0#25#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="90">
+              <caret line="18" column="146" selection-start-line="18" selection-start-column="146" selection-end-line="18" selection-end-column="146" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/games.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" column="22" lean-forward="true" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+              <folding>
+                <element signature="e#0#35#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -174,12 +181,15 @@
         <option value="$PROJECT_DIR$/v2/Enviroment.py" />
         <option value="$PROJECT_DIR$/mcts.py" />
         <option value="$PROJECT_DIR$/v2/MCTS.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/utils.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/agents.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/main.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="536" />
-    <option name="y" value="47" />
+    <option name="y" value="24" />
     <option name="width" value="1297" />
     <option name="height" value="1020" />
   </component>
@@ -197,6 +207,17 @@
             <path>
               <item name="AI-General" type="b2602c69:ProjectViewProjectNode" />
               <item name="AI-General" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="AI-General" type="b2602c69:ProjectViewProjectNode" />
+              <item name="AI-General" type="462c0819:PsiDirectoryNode" />
+              <item name="ddpg_meta" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="AI-General" type="b2602c69:ProjectViewProjectNode" />
+              <item name="AI-General" type="462c0819:PsiDirectoryNode" />
+              <item name="ddpg_meta" type="462c0819:PsiDirectoryNode" />
+              <item name="data_log" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="AI-General" type="b2602c69:ProjectViewProjectNode" />
@@ -226,7 +247,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Enviroment">
+  <component name="RunManager" selected="Python.main">
     <configuration name="Enviroment" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="AI-General" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -311,7 +332,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="env_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="agents" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="AI-General" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -319,11 +340,32 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/tourch_gym/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ddpg_meta" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/env_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ddpg_meta/agents.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="AI-General" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/tourch_gym/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ddpg_meta" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ddpg_meta/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -353,42 +395,21 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="models" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="AI-General" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/tourch_gym/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.mcts" />
-      <item itemvalue="Python.env_test" />
-      <item itemvalue="Python.models" />
       <item itemvalue="Python.LSTMmodel" />
       <item itemvalue="Python.Enviroment" />
       <item itemvalue="Python.MCTS" />
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python.agents" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.agents" />
         <item itemvalue="Python.Enviroment" />
         <item itemvalue="Python.MCTS" />
         <item itemvalue="Python.LSTMmodel" />
-        <item itemvalue="Python.models" />
-        <item itemvalue="Python.env_test" />
       </list>
     </recent_temporary>
   </component>
@@ -582,14 +603,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="536" y="47" width="1297" height="1020" extended-state="0" />
+    <frame x="536" y="24" width="1297" height="1020" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2488226" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2488226" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3295964" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3295964" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -679,16 +701,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/env_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1680">
-          <caret line="113" column="38" selection-start-line="113" selection-start-column="38" selection-end-line="113" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/v2/MCTS.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="600">
@@ -718,10 +730,72 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/v2/Enviroment.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
+        <state relative-caret-position="645">
           <caret line="43" column="53" selection-start-line="43" selection-start-column="53" selection-end-line="43" selection-end-column="53" />
           <folding>
             <marker date="1577185415851" expanded="true" signature="10:11" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/env_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="517">
+          <caret line="113" column="38" selection-start-line="113" selection-start-column="38" selection-end-line="113" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/games.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="22" lean-forward="true" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/replay_buffers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="18" column="146" selection-start-line="18" selection-start-column="146" selection-end-line="18" selection-end-column="146" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/agents.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="195" column="29" lean-forward="true" selection-start-line="195" selection-start-column="29" selection-end-line="195" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1590171502456" expanded="true" signature="2292:2459" ph="..." />
+            <marker date="1590171502456" expanded="true" signature="6373:8917" ph="..." />
+            <marker date="1590171502456" expanded="true" signature="7311:7400" ph="..." />
           </folding>
         </state>
       </provider>

@@ -2,6 +2,8 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import seaborn as sns
+sns.set(style="darkgrid")
 
 
 class MiniLog(object):
@@ -16,6 +18,7 @@ class MiniLog(object):
         self.ep_loss = defaultdict(list)
         self.mean_buff = []
         self.mean_buff_t = []
+        self.pd_data = pd.DataFrame(columns=['TotalEnvInteracts', 'AverageEpRet', 'agent name'])
 
     def rput(self, r, d):
         self.t += 1
@@ -43,7 +46,9 @@ class MiniLog(object):
         self.mean_buff_t.append(self.t)
 
     def rplot(self):
-        plt.plot(self.n_interaction, self.reward)
+        sns.lineplot(x='TotalEnvInteracts', y='AverageEpRet',
+                     hue='agent name',  # style="event",
+                     data=self.pd_data)
         plt.show()
 
     def lplot(self):
@@ -55,8 +60,16 @@ class MiniLog(object):
     def bplot(self):
         plt.plot(self.mean_buff_t, self.mean_buff)
 
-    def pd_transform(self, x='TotalEnvInteracts', y='AverageEpRet', name='log'):
-        return pd.DataFrame({x: self.n_interaction, y: self.reward, 'Condition2': name})
+    def pd_append(self, name='1'):
+        new_data = pd.DataFrame({'TotalEnvInteracts': self.n_interaction, 'AverageEpRet': self.reward, 'agent name': name})
+        #print(new_data.head())
+        self.pd_data = self.pd_data.append(new_data, ignore_index=True)
+        self.epr = 0
+        self.s_epr = []
+        self.reward = []
+        self.n_interaction = []
+        self.t = 0
+
 
 
 
