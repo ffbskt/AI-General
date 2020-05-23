@@ -195,9 +195,9 @@ class HIRO(BaseAgent):
         self.h_reward = 0
         self.t_meta_train = 0
         self.ado = ado or env.action_space.shape * 3 # TODO only for bitflipping
-        self.low_agent = DDPGAgent(env, replay_buf, net=net, start_steps=2000, update_every=50,
+        self.low_agent = DDPGAgent(env, replay_buf, net=net, start_steps=3000, update_every=50,
               repl_size=10000)
-        self.high_agent = DDPGAgent(env, replay_buf, net=net, start_steps=2000, update_every=50,
+        self.high_agent = DDPGAgent(env, replay_buf, net=net, start_steps=3000, update_every=50,
               repl_size=10000)
 
     def reset_agent(self, seed=0):
@@ -207,9 +207,9 @@ class HIRO(BaseAgent):
     def get_action(self, o, noise_scale=None):
         # noise_scale=0 for test
         if self.done or self.low_agent.buffer.ptr % self.step_each == 0:
-            self.low_goal = self.high_agent.ac.act(torch.as_tensor(o, dtype=torch.float32))
+            self.low_goal = self.high_agent.get_action(o, noise_scale)
         o[self.ado[0]:self.ado[0] + self.ado[1]] = self.low_goal
-        return self.low_agent.ac.act(torch.as_tensor(o, dtype=torch.float32))
+        return self.low_agent.get_action(o, noise_scale)
 
 
 

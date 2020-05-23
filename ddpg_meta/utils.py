@@ -2,12 +2,18 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import time
 import seaborn as sns
 sns.set(style="darkgrid")
+import time
+from datetime import datetime
+# timestamp to datetime object in local time
+
 
 
 class MiniLog(object):
-    def __init__(self, step=500):
+    def __init__(self, step=500, save_dir='data_log/', name=''):
+
         self.epr = 0
         self.s_epr = []
         self.reward = []
@@ -19,6 +25,12 @@ class MiniLog(object):
         self.mean_buff = []
         self.mean_buff_t = []
         self.pd_data = pd.DataFrame(columns=['TotalEnvInteracts', 'AverageEpRet', 'agent name'])
+        self.save_file = save_dir + '/' + name + self.timestamp() + '.csv'
+
+    def timestamp(self):
+        timestamp = time.time()
+        date = str(datetime.fromtimestamp(timestamp))
+        return ''.join(date[:10].split('-') + date[11:16].split(':'))
 
     def rput(self, r, d):
         self.t += 1
@@ -69,6 +81,9 @@ class MiniLog(object):
         self.reward = []
         self.n_interaction = []
         self.t = 0
+
+    def save(self):
+        self.pd_data.to_csv(self.save_file)
 
 
 
