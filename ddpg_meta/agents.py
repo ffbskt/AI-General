@@ -35,13 +35,13 @@ class DDPGAgent(BaseAgent):
 
     def __init__(self, env, replay_buffer, net, act_shape=None, start_steps=200, update_every=100, iters=None, update_after=1000,
                  repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
-                 seed=0, act_noise=0.1, act_limit=None, cuda=True):
+                 seed=0, act_noise=0.1, act_limit=None):
         super(DDPGAgent, self).__init__(env)
         self.action_sp = self.env.action_space
         if act_shape:
             self.action_sp = self.ActionSpace(act_shape[-1])
-        self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed, cuda]
-        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed, cuda)
+        self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed]
+        self._init_net(*self.net_args)
         self.act_noise = act_noise
         self.act_dim = env.action_space.shape[0]
         self.act_limit = act_limit or env.action_space.high[0]
@@ -67,12 +67,10 @@ class DDPGAgent(BaseAgent):
         self.buffer.ptr, self.buffer.size = 0, 0
 
 
-    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp, seed, cuda):
+    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp, seed):
         torch.manual_seed(seed)
         np.random.seed(int(seed))
         self.ac = net(obs_sp, act_sp)
-        if cuda:
-            self.ac.cuda()
         # Create actor-critic module and target networks
         self.ac_targ = deepcopy(self.ac)
 
