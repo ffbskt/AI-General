@@ -12,7 +12,7 @@ from datetime import datetime
 
 
 class MiniLog(object):
-    def __init__(self, step=500, save_dir='data_log/', name=''):
+    def __init__(self, step=500, save_dir='data_log/', name='', kwargs={}, all_log_navigate='data_log/log_navi'):
 
         self.epr = 0
         self.s_epr = []
@@ -26,6 +26,8 @@ class MiniLog(object):
         self.mean_buff_t = []
         self.pd_data = pd.DataFrame(columns=['TotalEnvInteracts', 'AverageEpRet', 'agent name'])
         self.save_file = save_dir + '/' + name + self.timestamp() + '.csv'
+        with open(all_log_navigate, 'a+') as f:
+            f.write(str(kwargs) + '\t' + self.save_file + '\n')
 
     def timestamp(self):
         timestamp = time.time()

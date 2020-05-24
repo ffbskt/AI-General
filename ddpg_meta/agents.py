@@ -33,31 +33,31 @@ class DDPGAgent(BaseAgent):
             self.shape = [shape]
             self.high = np.ones(shape)
 
-    def __init__(self, env, ReplayBuffer, net, act_shape=None, start_steps=200, update_every=100, iters=None, update_after=1000,
+    def __init__(self, env, replay_buffer, net, act_shape=None, start_steps=200, update_every=100, iters=None, update_after=1000,
                  repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
-                 seed=0, act_noise=0.1):
+                 seed=0, act_noise=0.1, act_limit=None, cuda=True):
         super(DDPGAgent, self).__init__(env)
         self.action_sp = self.env.action_space
         if act_shape:
             self.action_sp = self.ActionSpace(act_shape[-1])
-        self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed]
-        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed)
+        self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed, cuda]
+        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed, cuda)
         self.act_noise = act_noise
         self.act_dim = env.action_space.shape[0]
-        self.act_limit = env.action_space.high[0]
-        self.buffer = ReplayBuffer(self.obs_dim, self.act_dim, size=repl_size)
+        self.act_limit = act_limit or env.action_space.high[0]
+        self.buffer = replay_buffer(self.obs_dim, self.act_dim, size=repl_size)
         self.start_steps = start_steps
         self.update_every = update_every
         self.update_after = update_after
         self.iters = iters or update_every
-        self._init_net(net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed)
+
 
         # Train
         self.batch_size = batch_size
         self.gamma = gamma
         self.polyak = polyak
 
-        self.log = MiniLog(100)
+        #self.log = MiniLog(100)
         self.t = 0
 
     def reset_agent(self, seed=0):
@@ -67,10 +67,12 @@ class DDPGAgent(BaseAgent):
         self.buffer.ptr, self.buffer.size = 0, 0
 
 
-    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp, seed):
+    def _init_net(self, net, pi_lr, q_lr, obs_sp, act_sp, seed, cuda):
         torch.manual_seed(seed)
         np.random.seed(int(seed))
         self.ac = net(obs_sp, act_sp)
+        if cuda:
+            self.ac.cuda()
         # Create actor-critic module and target networks
         self.ac_targ = deepcopy(self.ac)
 
@@ -96,7 +98,7 @@ class DDPGAgent(BaseAgent):
     def store(self, obs, act, rew, next_obs, done):
         self.buffer.store(obs, act, rew, next_obs, done)
         self.t += 1
-        self.log.rput(rew, done)
+        #self.log.rput(rew, done)
         if (self.t > self.update_after) and (not self.buffer.ptr % self.update_every):
             self.train()
 
@@ -138,7 +140,7 @@ class DDPGAgent(BaseAgent):
         # First run one gradient descent step for Q.
         self.q_optimizer.zero_grad()
         loss_q, loss_info = self.__compute_loss_q(data)
-        self.log.lput(loss_q, 'q')
+        #self.log.lput(loss_q, 'q')
         #self.log.append(loss_q.data.numpy())
         loss_q.backward()
         self.q_optimizer.step()
@@ -152,7 +154,7 @@ class DDPGAgent(BaseAgent):
         self.pi_optimizer.zero_grad()
         loss_pi = self.__compute_loss_pi(data)
         # print(loss_pi)
-        self.log.lput(loss_pi, 'pi')
+        #self.log.lput(loss_pi, 'pi')
         loss_pi.backward()
         self.pi_optimizer.step()
 
@@ -179,7 +181,8 @@ class DDPGAgent(BaseAgent):
 
 
 class HIRO(BaseAgent):
-    def __init__(self, env, replay_buf, net, store_delay=200, train_delay=100, step_each=4, ado=None):
+    def __init__(self, env, low_agent_kwargs={}, high_agent_kwargs={},
+                 store_delay=200, train_delay=100, step_each=4, ado=None):
         """
 
         :param env:
@@ -194,11 +197,9 @@ class HIRO(BaseAgent):
         self.done = False
         self.h_reward = 0
         self.t_meta_train = 0
-        self.ado = ado or env.action_space.shape * 3 # TODO only for bitflipping
-        self.low_agent = DDPGAgent(env, replay_buf, net=net, start_steps=3000, update_every=50,
-              repl_size=10000)
-        self.high_agent = DDPGAgent(env, replay_buf, net=net, start_steps=3000, update_every=50,
-              repl_size=10000)
+        self.ado = ado or env.action_space.shape * 3  # TODO only for bitflipping
+        self.low_agent = DDPGAgent(**low_agent_kwargs)    #env, replay_buf, net=net, start_steps=3000, update_every=50, repl_size=10000)
+        self.high_agent = DDPGAgent(**high_agent_kwargs)  # env, replay_buf, net=net, start_steps=3000, update_every=50, repl_size=10000)
 
     def reset_agent(self, seed=0):
         self.low_agent.reset_agent(seed)

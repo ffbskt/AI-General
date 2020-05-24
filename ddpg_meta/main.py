@@ -13,16 +13,18 @@ a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=3000, update_e
               repl_size=10000)
 a.buffer = TransisionWrapper(ado=[size,] * 3,obs_dim=envf.observation_space.shape[0], act_dim=envf.action_space.shape[0], size=10000)
 
-
-hiro = HIRO(envf, ReplayBuffer, net=MLPActorCritic)#, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0] // 3],
+agent_kwargs = dict(env=envf, replay_buffer=ReplayBuffer, net=MLPActorCritic, start_steps=3000, update_every=50, repl_size=10000)
+hiro_kwargs = dict(env=envf, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0] // 3], start_steps=200, update_every=50)
+#print(hiro_kwargs.update(agent_kwargs))
+hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=agent_kwargs)#, net=MLPActorCritic, act_shape=[envf.observation_space.shape[0] // 3],
 #               start_steps=200, update_every=50)
 #hiro.low_agent.buffer = TransisionWrapper(ado=[size,] * 3,obs_dim=envf.observation_space.shape[0], act_dim=envf.action_space.shape[0], size=10000)
 #envm = Env_add_Meta(envf, [size] * 3, meta_agent=ma, goal_freq=2)
 
 
-def expirement(steps, agent, env, seed=(0, 3), agent_name='agent'):
+def expirement(steps, agent, env, seed=(0, 3), agent_name='agent', model_args={}):
     o = env.reset()
-    log = MiniLog(100)
+    log = MiniLog(100, kwargs=model_args)
     for s in seed:
         agent.reset_agent(s)
         for i in range(steps):
@@ -51,7 +53,7 @@ def test_agent(test_env, agent):
     return sum_r / n
 
 
-log = expirement(3000, hiro, envf)
+log = expirement(3000, hiro, envf, model_args={**hiro_kwargs, **agent_kwargs})
 #expirement(10000, a, envf)
 #print(log.pd_data.to_csv('data_log/hiro0_plus_her.csv'))
 log.rplot()
