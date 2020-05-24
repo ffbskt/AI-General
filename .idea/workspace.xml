@@ -4,6 +4,7 @@
     <list default="true" id="fe53b34f-afc0-4771-a4ed-cb884fa93e00" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ddpg_meta/agents.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/agents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ddpg_meta/grafics.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/grafics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ddpg_meta/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ddpg_meta/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ddpg_meta/utils.py" afterDir="false" />
     </list>
@@ -26,14 +27,14 @@
           <entry key="project.open.time.20" value="4" />
           <entry key="project.open.time.21" value="5" />
           <entry key="project.open.time.22" value="2" />
-          <entry key="project.open.time.23" value="1" />
+          <entry key="project.open.time.23" value="2" />
           <entry key="project.open.time.24" value="2" />
           <entry key="project.open.time.31" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.55" value="1" />
           <entry key="project.open.time.59" value="1" />
-          <entry key="project.opened" value="30" />
+          <entry key="project.opened" value="31" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -42,27 +43,27 @@
           <entry key="csv" value="1" />
           <entry key="ipynb" value="1" />
           <entry key="log_navi" value="3" />
-          <entry key="py" value="24" />
+          <entry key="py" value="26" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="IPNB" value="1" />
           <entry key="PLAIN_TEXT" value="5" />
-          <entry key="Python" value="24" />
+          <entry key="Python" value="26" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="9" />
-          <entry key="py" value="16945" />
-          <entry key="txt" value="1086" />
+          <entry key="py" value="17419" />
+          <entry key="txt" value="1130" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1095" />
-          <entry key="Python" value="16945" />
+          <entry key="PLAIN_TEXT" value="1139" />
+          <entry key="Python" value="17419" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -77,8 +78,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ddpg_meta/replay_buffers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-40">
-              <caret line="20" selection-start-line="20" selection-end-line="20" />
+            <state relative-caret-position="405">
+              <caret line="30" column="44" selection-start-line="30" selection-start-column="44" selection-end-line="30" selection-end-column="44" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
               </folding>
@@ -86,11 +87,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ddpg_meta/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="26" column="41" lean-forward="true" selection-start-line="26" selection-start-column="41" selection-end-line="26" selection-end-column="41" />
+            <state relative-caret-position="397">
+              <caret line="75" column="97" selection-start-line="75" selection-start-column="97" selection-end-line="75" selection-end-column="97" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -99,10 +100,13 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ddpg_meta/data_log/log_navi">
+        <entry file="file://$PROJECT_DIR$/ddpg_meta/grafics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="24" lean-forward="true" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+            <state relative-caret-position="420">
+              <caret line="28" selection-start-line="28" selection-end-line="28" />
+              <folding>
+                <element signature="e#0#21#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -110,8 +114,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ddpg_meta/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="19" column="31" lean-forward="true" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+            <state relative-caret-position="381">
+              <caret line="37" column="25" lean-forward="true" selection-start-line="37" selection-start-column="25" selection-end-line="37" selection-end-column="25" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
               </folding>
@@ -119,17 +123,17 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ddpg_meta/agents.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="51" column="42" lean-forward="true" selection-start-line="51" selection-start-column="42" selection-end-line="51" selection-end-column="42" />
+            <state relative-caret-position="424">
+              <caret line="207" column="72" lean-forward="true" selection-start-line="207" selection-start-column="72" selection-end-line="207" selection-end-column="72" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <marker date="1590312975511" expanded="true" signature="2221:2227" ph="..." />
-                <marker date="1590312975511" expanded="true" signature="2257:2424" ph="..." />
-                <marker date="1590312975511" expanded="true" signature="6391:8957" ph="..." />
-                <marker date="1590312975511" expanded="true" signature="7393:7482" ph="..." />
+                <marker date="1590333585071" expanded="true" signature="2147:2153" ph="..." />
+                <marker date="1590333585071" expanded="true" signature="2183:2350" ph="..." />
+                <marker date="1590333585071" expanded="true" signature="6267:8833" ph="..." />
+                <marker date="1590333585071" expanded="true" signature="7269:7358" ph="..." />
               </folding>
             </state>
           </provider>
@@ -160,8 +164,9 @@
       <find>ucb</find>
       <find>visited</find>
       <find>Mini</find>
-      <find>Log</find>
       <find>MiniLog</find>
+      <find>Log</find>
+      <find>cuda</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -187,16 +192,16 @@
         <option value="$PROJECT_DIR$/mcts.py" />
         <option value="$PROJECT_DIR$/v2/MCTS.py" />
         <option value="$PROJECT_DIR$/../../spinningup/spinup/utils/plot.py" />
-        <option value="$PROJECT_DIR$/ddpg_meta/grafics.py" />
-        <option value="$PROJECT_DIR$/ddpg_meta/utils.py" />
-        <option value="$PROJECT_DIR$/ddpg_meta/main.py" />
         <option value="$PROJECT_DIR$/ddpg_meta/agents.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/utils.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/grafics.py" />
+        <option value="$PROJECT_DIR$/ddpg_meta/main.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="628" />
-    <option name="y" value="38" />
+    <option name="x" value="613" />
+    <option name="y" value="34" />
     <option name="width" value="1297" />
     <option name="height" value="1020" />
   </component>
@@ -208,7 +213,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -236,6 +240,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -254,7 +259,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.grafics">
     <configuration name="Enviroment" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="AI-General" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -412,8 +417,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.grafics" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.agents" />
         <item itemvalue="Python.Enviroment" />
         <item itemvalue="Python.MCTS" />
@@ -620,11 +625,25 @@
       <option name="project" value="LOCAL" />
       <updated>1590264348894</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="cuda and navigation log folder + kwargs">
+      <created>1590313002915</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1590313002915</updated>
+    </task>
+    <task id="LOCAL-00029" summary="navigation log folder + kwargs">
+      <created>1590315982090</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1590315982090</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="628" y="38" width="1297" height="1020" extended-state="0" />
+    <frame x="613" y="34" width="1297" height="1020" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2488226" />
@@ -650,8 +669,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="new mcts implementation" />
-    <MESSAGE value="new mcts implementation finish! need net" />
     <MESSAGE value="Net train implement... bad . Wrong predict P and real P need formula[-1]" />
     <MESSAGE value="One epoch study work (prob_pred == Q_real, before try whith N)" />
     <MESSAGE value="two algo not fully connected, but can sample." />
@@ -675,7 +692,9 @@
     <MESSAGE value="Adversarial game at ip notebook. Before small refactor and check on simplicity." />
     <MESSAGE value="myHIRO DONE" />
     <MESSAGE value="myHIRO DONE add save to log" />
-    <option name="LAST_COMMIT_MESSAGE" value="myHIRO DONE add save to log" />
+    <MESSAGE value="cuda and navigation log folder + kwargs" />
+    <MESSAGE value="navigation log folder + kwargs" />
+    <option name="LAST_COMMIT_MESSAGE" value="navigation log folder + kwargs" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/-389656431/numpy/random/mtrand.py">
@@ -791,38 +810,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ddpg_meta/replay_buffers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-40">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ddpg_meta/grafics.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="14" lean-forward="true" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ddpg_meta/data_log/202005241220.csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/ddpg_meta/log_navi">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ddpg_meta/utils.py">
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/log_navi" />
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/replay_buffers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="19" column="31" lean-forward="true" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+        <state relative-caret-position="405">
+          <caret line="30" column="44" selection-start-line="30" selection-start-column="44" selection-end-line="30" selection-end-column="44" />
           <folding>
-            <element signature="e#0#35#0" expanded="true" />
+            <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -830,30 +827,57 @@
     <entry file="file://$PROJECT_DIR$/ddpg_meta/data_log/log_navi">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
-          <caret line="4" column="24" lean-forward="true" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+          <caret line="4" column="24" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ddpg_meta/main.py">
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="26" column="41" lean-forward="true" selection-start-line="26" selection-start-column="41" selection-end-line="26" selection-end-column="41" />
+        <state relative-caret-position="381">
+          <caret line="37" column="25" lean-forward="true" selection-start-line="37" selection-start-column="25" selection-end-line="37" selection-end-column="25" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ddpg_meta/agents.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="51" column="42" lean-forward="true" selection-start-line="51" selection-start-column="42" selection-end-line="51" selection-end-column="42" />
+        <state relative-caret-position="424">
+          <caret line="207" column="72" lean-forward="true" selection-start-line="207" selection-start-column="72" selection-end-line="207" selection-end-column="72" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <marker date="1590312975511" expanded="true" signature="2221:2227" ph="..." />
-            <marker date="1590312975511" expanded="true" signature="2257:2424" ph="..." />
-            <marker date="1590312975511" expanded="true" signature="6391:8957" ph="..." />
-            <marker date="1590312975511" expanded="true" signature="7393:7482" ph="..." />
+            <marker date="1590333585071" expanded="true" signature="2147:2153" ph="..." />
+            <marker date="1590333585071" expanded="true" signature="2183:2350" ph="..." />
+            <marker date="1590333585071" expanded="true" signature="6267:8833" ph="..." />
+            <marker date="1590333585071" expanded="true" signature="7269:7358" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/spinningup/lib/python3.6/site-packages/pandas/core/generic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="1478" selection-start-line="1478" selection-end-line="1478" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/grafics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="28" selection-start-line="28" selection-end-line="28" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ddpg_meta/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="75" column="97" selection-start-line="75" selection-start-column="97" selection-end-line="75" selection-end-column="97" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

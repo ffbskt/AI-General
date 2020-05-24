@@ -34,7 +34,7 @@ class DDPGAgent(BaseAgent):
             self.high = np.ones(shape)
 
     def __init__(self, env, replay_buffer, net, act_shape=None, start_steps=200, update_every=100, iters=None, update_after=1000,
-                 repl_size=5000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
+                 repl_size=10000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
                  seed=0, act_noise=0.1, act_limit=None):
         super(DDPGAgent, self).__init__(env)
         self.action_sp = self.env.action_space

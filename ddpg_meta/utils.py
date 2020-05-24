@@ -25,14 +25,15 @@ class MiniLog(object):
         self.mean_buff = []
         self.mean_buff_t = []
         self.pd_data = pd.DataFrame(columns=['TotalEnvInteracts', 'AverageEpRet', 'agent name'])
-        self.save_file = save_dir + '/' + name + self.timestamp() + '.csv'
+        self.time = self.timestamp()
+        self.save_file = save_dir + '/' + name + self.time + '.csv'
         with open(all_log_navigate, 'a+') as f:
             f.write(str(kwargs) + '\t' + self.save_file + '\n')
 
     def timestamp(self):
         timestamp = time.time()
         date = str(datetime.fromtimestamp(timestamp))
-        return ''.join(date[:10].split('-') + date[11:16].split(':'))
+        return ''.join(date[:10].split('-') + date[11:19].split(':'))
 
     def rput(self, r, d):
         self.t += 1
