@@ -15,8 +15,12 @@ from agents import DDPGAgent, HIRO
 # Default options
 size=3
 env_kw = dict(size=size, rad=1, discret_space=False, seed=0)
-env = BitFlipping2(**env_kw)
-envf = gym.wrappers.FlattenObservation(gym.wrappers.FilterObservation(env))
+# env = BitFlipping2(**env_kw)
+# envf = gym.wrappers.FlattenObservation(gym.wrappers.FilterObservation(env))
+
+envf = gym.make('LunarLanderContinuous-v2')
+print(envf.observation_space, envf.action_space, envf.reset())
+
 
 agent_kwargs = dict(env=envf, replay_buffer=ReplayBuffer, net=MLPActorCritic, start_steps=200, update_every=100, iters=None, update_after=100,
                  repl_size=10000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
@@ -47,9 +51,11 @@ def expirement(steps, agent, env, seed=(0, 2, 3), agent_name='agent', model_args
 
 
 
+### pre test
+a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=3000, update_every=50, repl_size=10000)
+o = envf.reset()
+expirement(10000, a, envf, model_args={**agent_kwargs, **hagent_kwargs})
 
-# a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=3000, update_every=50,
-#              repl_size=10000)
 def test_agent(agent):
     sum_r = 0
     n = 100
@@ -66,15 +72,15 @@ def test_agent(agent):
 
 hiro_kwargs = dict(store_delay=20, train_delay=10, step_each=1, ado=None)
 
+#hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
 
-
-for p in [0.1, 0]:
-  hagent_kwargs['act_noise'] = p
-  hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
-  expirement(1000, hiro, envf, model_args={**agent_kwargs, **hagent_kwargs})
-  print(hiro.high_agent.act_noise, test_agent(hiro))
-for p in [1, 10]:
-  hagent_kwargs['act_limit'] = p
-  hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
-  expirement(1000, hiro, envf, model_args={**agent_kwargs, **hagent_kwargs})
-  print(hiro.high_agent.act_noise, test_agent(hiro))
+#for p in [0.1, 0]:
+#  hagent_kwargs['act_noise'] = p
+#  hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
+#  expirement(1000, hiro, envf, model_args={**agent_kwargs, **hagent_kwargs})
+#  print(hiro.high_agent.act_noise, test_agent(hiro))
+#for p in [1, 10]:
+#  hagent_kwargs['act_limit'] = p
+#  hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
+#  expirement(1000, hiro, envf, model_args={**agent_kwargs, **hagent_kwargs})
+#  print(hiro.high_agent.act_noise, test_agent(hiro))

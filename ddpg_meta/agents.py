@@ -248,15 +248,36 @@ if __name__ == '__main__':
     from games import BitFlipping2
     from utils import MiniLog
 
-    env = BitFlipping2(4, 1, False)
+    size = 3
+    env = BitFlipping2(size, 1, False)
     envf = gym.wrappers.FlattenObservation(gym.wrappers.FilterObservation(env))
     print(env, envf.observation_space.shape[0]/3)
     a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=200, update_every=100,
                      repl_size=10000)
-    hiro = HIRO(envf, ReplayBuffer)
-
+    agent_kwargs = dict(env=envf, replay_buffer=ReplayBuffer, net=MLPActorCritic, start_steps=200, update_every=100,
+                        iters=None, update_after=100,
+                        repl_size=10000, pi_lr=0.001, q_lr=0.001, batch_size=32, gamma=0.99, polyak=0.995,
+                        seed=0, act_noise=0.1, act_limit=None)
+    hagent_kwargs = agent_kwargs
+    hiro_kwargs = dict(store_delay=20, train_delay=10, step_each=1, ado=None)
+    hiro = HIRO(envf, low_agent_kwargs=agent_kwargs, high_agent_kwargs=hagent_kwargs, **hiro_kwargs)
     obs = envf.reset()
 
     e = a.get_action(obs)
     print(a.get_action(obs), hiro.get_action(obs))
+
+    print("\n---------LunarLanderContinuous-v2 environment-----")
+    env_kw = dict(size=size, rad=1, discret_space=False, seed=0)
+    # env = BitFlipping2(**env_kw)
+    # envf = gym.wrappers.FlattenObservation(gym.wrappers.FilterObservation(env))
+
+    envf = gym.make('LunarLanderContinuous-v2')
+    print(envf.observation_space, envf.action_space, envf.reset())
+
+
+
+    a = DDPGAgent(envf, ReplayBuffer, net=MLPActorCritic, start_steps=3000, update_every=50, repl_size=10000)
+    obs = envf.reset()
+    e = a.get_action(obs)
+    print(e)
 
