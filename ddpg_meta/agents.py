@@ -43,7 +43,7 @@ class DDPGAgent(BaseAgent):
         self.net_args = [net, pi_lr, q_lr, self.env.observation_space, self.action_sp, seed]
         self._init_net(*self.net_args)
         self.act_noise = act_noise
-        self.act_dim = env.action_space.shape[0]
+        self.act_dim = self.action_sp.shape[0] #env.action_space.shape[0]
         self.act_limit = act_limit or env.action_space.high[0]
         self.buffer = replay_buffer(self.obs_dim, self.act_dim, size=repl_size)
         self.start_steps = start_steps

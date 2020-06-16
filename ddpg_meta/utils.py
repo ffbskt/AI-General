@@ -7,6 +7,9 @@ import seaborn as sns
 sns.set(style="darkgrid")
 import time
 from datetime import datetime
+from gym import ObservationWrapper
+from gym.spaces import Box
+from gym.spaces import Discrete
 # timestamp to datetime object in local time
 
 
@@ -89,7 +92,25 @@ class MiniLog(object):
         self.pd_data.to_csv(self.save_file)
 
 
+# Wrap observation for ado
 
+
+
+class ADOWrapper(ObservationWrapper):
+    r"""Observation wrapper that copy obs to [achivegoal, desiregoal, observation]."""
+
+    def __init__(self, env):
+        super(ADOWrapper, self).__init__(env)
+        self.observation_space = Box(-100, 100, shape=[env.observation_space.shape[0] * 3])
+
+    def observation(self, observation):
+        if isinstance(self.env.observation_space, Box):
+            obs = np.asarray(observation, dtype=np.float32).flatten()
+        elif isinstance(self.env.observation_space, Discrete):
+            obs = np.zeros(space.n, dtype=np.float32)
+            obs[observation] = 1.0
+
+        return np.hstack([obs, obs, obs])
 
 def build_agent(env, cls):#, hidden_sizes=(256,256), activation=torch.nn.ReLU):
     #print(env.action_space.shape == ())
